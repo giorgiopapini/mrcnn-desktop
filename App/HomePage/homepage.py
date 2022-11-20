@@ -80,7 +80,9 @@ class HomePage:
         self.__set_button_state(False)
         object_detector = ObjectDetector()
         object_detector.start()
-        print(object_detector.average_area / object_detector.pixel_cm_squared_ratio)
+        print(object_detector.total_area_pixel / object_detector.pixel_cm_squared_ratio)
+        print(object_detector.shapes[0].average_area)
+        print(len(object_detector.shapes))
 
     def start_aruco_marker_detection(self):
         aruco_detector = ArucoDetector()

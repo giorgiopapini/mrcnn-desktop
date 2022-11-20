@@ -1,3 +1,4 @@
+from App import constants
 from App.statistics_analyzer import StatisticsAnalyzer
 
 
@@ -14,17 +15,18 @@ class Shape:
         self.y_center = y_center
 
     def try_add_area(self, area, cx, cy):
-        if self.__shape_respects_boundaries(cx, cy):
+        if self.shape_respects_boundaries(cx, cy):
             self.areas.append(area)
 
     def try_add_perim(self, perim, cx, cy):
-        if self.__shape_respects_boundaries(cx, cy):
+        if self.shape_respects_boundaries(cx, cy):
             self.perimeters.append(perim)
 
-    def __shape_respects_boundaries(self, cx, cy):
-        if self.x_center - 10 < cx < self.x_center + 10:
-            if self.y_center - 10 < cy < self.y_center + 10:
+    def shape_respects_boundaries(self, cx, cy):
+        if self.x_center - constants.CENTER_BOUNDARY < cx < self.x_center + constants.CENTER_BOUNDARY:
+            if self.y_center - constants.CENTER_BOUNDARY < cy < self.y_center + constants.CENTER_BOUNDARY:
                 return True
+            return False
         return False
 
     def calc_average_area(self):

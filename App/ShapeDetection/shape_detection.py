@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 from App import constants
 from App.Camera.camera_object import Camera
-from App.statistics_analyzer import StatisticsAnalyzer
+from App.ShapeDetection.shape import Shape
 
 
 def empty(a):
@@ -17,16 +17,13 @@ class ObjectDetector:
     current_time = None
     img_contour = None
 
-    area_raised_deviations = []
-    areas = []
-    average_area = 0
-
-    perim_raised_deviations = []
-    perimeters = []
-    average_perim = 0
-
     pixel_cm_squared_ratio = 0
     pixel_cm_ratio = 0
+
+    total_area_pixel = 0
+    total_perimeter_pixel = 0
+
+    shapes = []
 
     def __init__(self):
         self.current_time = time.time()
@@ -147,7 +144,6 @@ class ObjectDetector:
 
     def get_contours(self, img, img_contour):
         contours, hierachy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-        # IMPORTANTE!!!! -->TROVARE UN MODO PER IGNORARE IL MARKER!!!
         for cnt in contours:
             area = cv2.contourArea(cnt)
             peri = cv2.arcLength(cnt, True)
@@ -156,6 +152,7 @@ class ObjectDetector:
                 cx = int(m['m10'] / m['m00'])
                 cy = int(m['m01'] / m['m00'])
                 if self.__contour_respect_trackbars_conditions(area, peri):
+                    self.__try_update_shapes(area, peri, cx, cy)
                     cv2.drawContours(img_contour, cnt, -1, (255, 0, 255), 7)
                     approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
                     x, y, w, h = cv2.boundingRect(approx)
@@ -206,8 +203,6 @@ class ObjectDetector:
                         2
                     )
 
-                    self.__try_populate_data(current_area=area, current_perim=peri)
-
     def __contour_respect_trackbars_conditions(self, area, perimeter):
         min_area_selected = cv2.getTrackbarPos("Area Min", "Parameters")
         max_area_selected = cv2.getTrackbarPos("Area Max", "Parameters")
@@ -218,6 +213,24 @@ class ObjectDetector:
             if min_peri_selected < perimeter < max_peri_selected:
                 return True
         return False
+
+    def __try_update_shapes(self, area, perim, cx, cy):
+        if self.countdown_state and self.countdown_value > 0:
+            self.__update_shapes(area, perim, cx, cy)
+
+    def __update_shapes(self, area, perim, cx, cy):
+        shape = self.__get_shape_if_exist(cx, cy)
+        if shape is None:
+            shape = Shape(cx, cy)
+            self.shapes.append(shape)
+        shape.try_add_area(area, cx, cy)
+        shape.try_add_perim(perim, cx, cy)
+
+    def __get_shape_if_exist(self, cx, cy):
+        for shape in self.shapes:
+            if shape.shape_respects_boundaries(cx, cy):
+                return shape
+        return None
 
     def __try_get_area_and_perim_in_cm(self, area_pixel, perimeter_pixel):
         area = None
@@ -242,21 +255,6 @@ class ObjectDetector:
     def calculate_cm_from_ratio(pixels, pixel_cm_ratio):
         return pixels / pixel_cm_ratio
 
-    def __try_populate_data(self, current_area, current_perim):
-        if self.countdown_state and self.countdown_value > 0:
-            self.areas.append(current_area)
-            self.perimeters.append(current_perim)
-
-    def calc_area(self):
-        statistics_analyzer = StatisticsAnalyzer(self.area_raised_deviations, self.areas)
-        statistics_analyzer.try_clean_values()
-        self.average_area = statistics_analyzer.get_average_value()
-
-    def calc_perim(self):
-        statistics_analyzer = StatisticsAnalyzer(self.perim_raised_deviations, self.perimeters)
-        statistics_analyzer.try_clean_values()
-        self.average_perim = statistics_analyzer.get_average_value()
-
     def get_pressed_key(self):
         keys = cv2.waitKey(1) & 0xFF
 
@@ -271,8 +269,15 @@ class ObjectDetector:
                 self.__try_start_countdown()
 
     def __obtain_results(self):
-        self.calc_area()
-        self.calc_perim()
+        areas = []
+        perimeters = []
+        for shape in self.shapes:
+            shape.calc_average_area()
+            areas.append(shape.average_area)
+            shape.calc_average_perim()
+            perimeters.append(shape.average_perim)
+        self.total_area_pixel = sum(areas)
+        self.total_perimeter_pixel = sum(perimeters)
 
     def __try_start_countdown(self):
         if self.countdown_state is False:
