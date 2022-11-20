@@ -1,5 +1,5 @@
 from App.CameraCalibration.calibration import Calibrator
-from App.ObjectDetection.object_detection import ObjectDetector
+from App.ShapeDetection.shape_detection import ObjectDetector
 
 from new_main import new_main
 

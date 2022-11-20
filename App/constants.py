@@ -8,7 +8,7 @@ SCAN_CHAR = 's'
 ARUCO_AREA_IN_CM = 23  # 25 cm^2
 ARUCO_PERIM_IN_CM = 19  # 20 cm
 
-ADDRESS = "https://192.168.1.53:8080/video"
+ADDRESS = "https://192.168.1.56:8080/video"
 
 # ========== CALIBRATION ==========
 CALIBRATION_IMAGES_NEEDED = 30

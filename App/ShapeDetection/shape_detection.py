@@ -151,56 +151,62 @@ class ObjectDetector:
         for cnt in contours:
             area = cv2.contourArea(cnt)
             peri = cv2.arcLength(cnt, True)
+            m = cv2.moments(cnt)
+            if m['m00'] != 0:
+                cx = int(m['m10'] / m['m00'])
+                cy = int(m['m01'] / m['m00'])
+                if self.__contour_respect_trackbars_conditions(area, peri):
+                    cv2.drawContours(img_contour, cnt, -1, (255, 0, 255), 7)
+                    approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
+                    x, y, w, h = cv2.boundingRect(approx)
+                    cv2.rectangle(img_contour, (x, y), (x + w, y + h), (0, 255, 0), 5)
 
-            if self.__contour_respect_trackbars_conditions(area, peri):
-                cv2.drawContours(img_contour, cnt, -1, (255, 0, 255), 7)
-                approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
-                x, y, w, h = cv2.boundingRect(approx)
-                cv2.rectangle(img_contour, (x, y), (x + w, y + h), (0, 255, 0), 5)
+                    cv2.putText(img_contour, f"x({cx}), y({cy})", (cx - 20, cy - 20),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
-                cv2.putText(
-                    img_contour,
-                    "Area: " + str(int(area)),
-                    (x + w + 20, y + 45),
-                    cv2.FONT_HERSHEY_COMPLEX,
-                    .7,
-                    (0, 255, 0),
-                    2
-                )
+                    cv2.putText(
+                        img_contour,
+                        "Area: " + str(int(area)),
+                        (x + w + 20, y + 45),
+                        cv2.FONT_HERSHEY_COMPLEX,
+                        .7,
+                        (0, 255, 0),
+                        2
+                    )
 
-                cv2.putText(
-                    img_contour,
-                    "Peri: " + str(int(peri)),
-                    (x + w + 20, y + 70),
-                    cv2.FONT_HERSHEY_COMPLEX,
-                    .7,
-                    (0, 255, 0),
-                    2
-                )
+                    cv2.putText(
+                        img_contour,
+                        "Peri: " + str(int(peri)),
+                        (x + w + 20, y + 70),
+                        cv2.FONT_HERSHEY_COMPLEX,
+                        .7,
+                        (0, 255, 0),
+                        2
+                    )
 
-                area_cm, perim_cm = self.__try_get_area_and_perim_in_cm(area, peri)
+                    area_cm, perim_cm = self.__try_get_area_and_perim_in_cm(area, peri)
 
-                cv2.putText(
-                    img_contour,
-                    f"Area cm: {area_cm}",
-                    (x + w + 20, y + 95),
-                    cv2.FONT_HERSHEY_COMPLEX,
-                    .7,
-                    (0, 255, 0),
-                    2
-                )
+                    cv2.putText(
+                        img_contour,
+                        f"Area cm: {area_cm}",
+                        (x + w + 20, y + 95),
+                        cv2.FONT_HERSHEY_COMPLEX,
+                        .7,
+                        (0, 255, 0),
+                        2
+                    )
 
-                cv2.putText(
-                    img_contour,
-                    f"Perim cm: {perim_cm}",
-                    (x + w + 20, y + 120),
-                    cv2.FONT_HERSHEY_COMPLEX,
-                    .7,
-                    (0, 255, 0),
-                    2
-                )
+                    cv2.putText(
+                        img_contour,
+                        f"Perim cm: {perim_cm}",
+                        (x + w + 20, y + 120),
+                        cv2.FONT_HERSHEY_COMPLEX,
+                        .7,
+                        (0, 255, 0),
+                        2
+                    )
 
-                self.__try_populate_data(current_area=area, current_perim=peri)
+                    self.__try_populate_data(current_area=area, current_perim=peri)
 
     def __contour_respect_trackbars_conditions(self, area, perimeter):
         min_area_selected = cv2.getTrackbarPos("Area Min", "Parameters")

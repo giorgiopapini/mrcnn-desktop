@@ -2,7 +2,7 @@ from tkinter import *
 
 from App.ArucoDetection.aruco_detection import ArucoDetector
 from App.CameraCalibration.calibration import Calibrator
-from App.ObjectDetection.object_detection import ObjectDetector
+from App.ShapeDetection.shape_detection import ObjectDetector
 
 
 class HomePage:
@@ -80,6 +80,7 @@ class HomePage:
         self.__set_button_state(False)
         object_detector = ObjectDetector()
         object_detector.start()
+        print(object_detector.average_area / object_detector.pixel_cm_squared_ratio)
 
     def start_aruco_marker_detection(self):
         aruco_detector = ArucoDetector()
