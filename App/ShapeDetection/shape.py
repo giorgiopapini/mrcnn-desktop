@@ -1,3 +1,5 @@
+import cv2
+
 from App import constants
 from App.statistics_analyzer import StatisticsAnalyzer
 
@@ -10,9 +12,10 @@ class Shape:
     average_area = 0
     average_perim = 0
 
-    def __init__(self, x_center, y_center):
+    def __init__(self, x_center, y_center, contour):
         self.x_center = x_center
         self.y_center = y_center
+        self.contour = contour
 
     def try_add_area(self, area, cx, cy):
         if self.shape_respects_boundaries(cx, cy):
@@ -38,3 +41,12 @@ class Shape:
         statistics_analyzer = StatisticsAnalyzer(self.perim_raised_deviations, self.perimeters)
         statistics_analyzer.try_clean_values()
         self.average_perim = statistics_analyzer.get_average_value()
+
+    def get_shape_bounding_box_data(self):
+        if self.average_perim == 0:
+            self.calc_average_perim()
+        if self.average_area == 0:
+            self.calc_average_area()
+        approx = cv2.approxPolyDP(self.contour, 0.02 * self.average_perim, True)
+        x, y, w, h = cv2.boundingRect(approx)
+        return x, y, w, h

@@ -8,7 +8,7 @@ SCAN_CHAR = 's'
 ARUCO_AREA_IN_CM = 23  # 25 cm^2
 ARUCO_PERIM_IN_CM = 19  # 20 cm
 
-ADDRESS = "https://192.168.1.56:8080/video"
+ADDRESS = "https://192.168.43.1:8080/video"
 
 # ========== CALIBRATION ==========
 CALIBRATION_IMAGES_NEEDED = 30
@@ -18,3 +18,9 @@ FOCAL_LENGTH_MM = 4
 
 # ======= SHAPE BOUNDARIES =======
 CENTER_BOUNDARY = 20
+
+# ========== PAGE NAMES ==========
+ARUCO_DETECTION_WINDOW_NAME = "Aruco Scanner"
+SHAPE_DETECTION_WINDOW_NAME = "Scanner"
+PARAMETERS_WINDOW_NAME = "Parameters"
+CALIBRATION_WINDOW_NAME = "Camera Calibration"

@@ -33,16 +33,18 @@ class ArucoDetector:
 
             self.__try_locate_aruco_marker(img=undistorted_img)
             self.__try_show_commands(img=undistorted_img)
-            cv2.imshow("Aruco Scanner", undistorted_img)
+            cv2.imshow(constants.ARUCO_DETECTION_WINDOW_NAME, undistorted_img)
 
             key_pressed = self.get_key_pressed()
             if key_pressed == constants.SCAN_CHAR:
                 if self.is_aruco_located:
-                    cv2.destroyWindow("Aruco Scanner")
+                    cv2.destroyWindow(constants.ARUCO_DETECTION_WINDOW_NAME)
                     self.__save_ratios_in_json()
                     break
             elif key_pressed == constants.QUIT_CHAR:
-                cv2.destroyWindow("Aruco Scanner")
+                cv2.destroyWindow(constants.ARUCO_DETECTION_WINDOW_NAME)
+                break
+            elif cv2.getWindowProperty(constants.ARUCO_DETECTION_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
                 break
 
     def __try_show_commands(self, img):
@@ -106,6 +108,7 @@ class ArucoDetector:
             return constants.SCAN_CHAR
         elif keys == ord(constants.QUIT_CHAR):
             return constants.QUIT_CHAR
+
 
     def __save_ratios_in_json(self):
         with open("App/Camera/ratios.json", 'w') as file:

@@ -2,6 +2,7 @@ from tkinter import *
 
 from App.ArucoDetection.aruco_detection import ArucoDetector
 from App.CameraCalibration.calibration import Calibrator
+from App.ShapeDetection.cropper import Cropper
 from App.ShapeDetection.shape_detection import ObjectDetector
 
 
@@ -80,9 +81,15 @@ class HomePage:
         self.__set_button_state(False)
         object_detector = ObjectDetector()
         object_detector.start()
-        print(object_detector.total_area_pixel / object_detector.pixel_cm_squared_ratio)
-        print(object_detector.shapes[0].average_area)
-        print(len(object_detector.shapes))
+        #print(object_detector.total_area_pixel / object_detector.pixel_cm_squared_ratio)
+        #print(object_detector.shapes[0].average_area)
+        #print(len(object_detector.shapes))
+        #print(object_detector.undistorted_img)
+        self.crop_shapes_and_save(object_detector.undistorted_img, object_detector.shapes)
+
+    def crop_shapes_and_save(self, original_img, shapes):
+        cropper = Cropper(original_img, shapes)
+        cropper.crop_shapes()
 
     def start_aruco_marker_detection(self):
         aruco_detector = ArucoDetector()

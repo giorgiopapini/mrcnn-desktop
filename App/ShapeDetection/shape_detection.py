@@ -12,6 +12,8 @@ def empty(a):
 
 
 class ObjectDetector:
+    undistorted_img = None
+
     countdown_value = constants.SCAN_TIME
     countdown_state = False
     current_time = None
@@ -50,47 +52,53 @@ class ObjectDetector:
             self.pixel_cm_squared_ratio = json_object['pixel_cm_squared_ratio']
 
     def __create_parameters_window(self):
-        cv2.namedWindow("Parameters")
-        cv2.resizeWindow("Parameters", 700, 315)
-        cv2.createTrackbar("Threshold1", "Parameters", 46, 255, empty)
-        cv2.createTrackbar("Threshold2", "Parameters", 46, 255, empty)
-        cv2.createTrackbar("Area Min", "Parameters", 5000, 30000, empty)
-        cv2.createTrackbar("Area Max", "Parameters", 300000, 30000, empty)
-        cv2.createTrackbar("Perim Min", "Parameters", 0, 10000, empty)
-        cv2.createTrackbar("Perim Max", "Parameters", 10000, 10000, empty)
+        cv2.namedWindow(constants.PARAMETERS_WINDOW_NAME)
+        cv2.resizeWindow(constants.PARAMETERS_WINDOW_NAME, 700, 315)
+        cv2.createTrackbar("Threshold1", constants.PARAMETERS_WINDOW_NAME, 46, 255, empty)
+        cv2.createTrackbar("Threshold2", constants.PARAMETERS_WINDOW_NAME, 46, 255, empty)
+        cv2.createTrackbar("Area Min", constants.PARAMETERS_WINDOW_NAME, 5000, 30000, empty)
+        cv2.createTrackbar("Area Max", constants.PARAMETERS_WINDOW_NAME, 300000, 30000, empty)
+        cv2.createTrackbar("Perim Min", constants.PARAMETERS_WINDOW_NAME, 0, 10000, empty)
+        cv2.createTrackbar("Perim Max", constants.PARAMETERS_WINDOW_NAME, 10000, 10000, empty)
 
     def start(self):
         while True:
             success, img = self.cap.read()
-            undistorted_img = cv2.undistort(
+            self.undistorted_img = cv2.undistort(
                 img,
                 self.camera.camera_matrix,
                 self.camera.distortion_data,
                 None,
                 self.camera.undistorted_camera_matrix
             )
-            undistorted_img = cv2.resize(undistorted_img, None, None, fx=0.5, fy=0.5)
+            self.undistorted_img = cv2.resize(self.undistorted_img, None, None, fx=0.5, fy=0.5)
 
-            img_blur = cv2.GaussianBlur(undistorted_img, (7, 7), 1)
+            img_blur = cv2.GaussianBlur(self.undistorted_img, (7, 7), 1)
             img_gray = cv2.cvtColor(img_blur, cv2.COLOR_BGR2GRAY)
 
-            threshold1 = cv2.getTrackbarPos("Threshold1", "Parameters")
-            threshold2 = cv2.getTrackbarPos("Threshold2", "Parameters")
+            threshold1 = cv2.getTrackbarPos("Threshold1", constants.PARAMETERS_WINDOW_NAME)
+            threshold2 = cv2.getTrackbarPos("Threshold2", constants.PARAMETERS_WINDOW_NAME)
             img_canny = cv2.Canny(img_gray, threshold1, threshold2)
 
             kernel = np.ones((5, 5))
             img_dil = cv2.dilate(img_canny, kernel, iterations=1)
 
-            self.img_contour = undistorted_img.copy()
+            self.img_contour = self.undistorted_img.copy()
             self.__try_show_commmands(img=self.img_contour)
             self.__try_manage_countdown(img=self.img_contour)
             self.get_contours(img_dil, self.img_contour)
 
-            cv2.imshow("Scanner", self.img_contour)  # renderizza l'immagine
+            cv2.imshow(constants.SHAPE_DETECTION_WINDOW_NAME, self.img_contour)  # renderizza l'immagine
 
             if self.get_pressed_key() == constants.QUIT_CHAR:
-                cv2.destroyWindow("Parameters")
-                cv2.destroyWindow("Scanner")
+                cv2.destroyWindow(constants.PARAMETERS_WINDOW_NAME)
+                cv2.destroyWindow(constants.SHAPE_DETECTION_WINDOW_NAME)
+                break
+            elif cv2.getWindowProperty(constants.SHAPE_DETECTION_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
+                cv2.destroyWindow(constants.PARAMETERS_WINDOW_NAME)
+                break
+            elif cv2.getWindowProperty(constants.PARAMETERS_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
+                cv2.destroyWindow(constants.SHAPE_DETECTION_WINDOW_NAME)
                 break
 
     def __try_show_commmands(self, img):
@@ -152,7 +160,7 @@ class ObjectDetector:
                 cx = int(m['m10'] / m['m00'])
                 cy = int(m['m01'] / m['m00'])
                 if self.__contour_respect_trackbars_conditions(area, peri):
-                    self.__try_update_shapes(area, peri, cx, cy)
+                    self.__try_update_shapes(cnt, area, peri, cx, cy)
                     cv2.drawContours(img_contour, cnt, -1, (255, 0, 255), 7)
                     approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
                     x, y, w, h = cv2.boundingRect(approx)
@@ -204,24 +212,24 @@ class ObjectDetector:
                     )
 
     def __contour_respect_trackbars_conditions(self, area, perimeter):
-        min_area_selected = cv2.getTrackbarPos("Area Min", "Parameters")
-        max_area_selected = cv2.getTrackbarPos("Area Max", "Parameters")
-        min_peri_selected = cv2.getTrackbarPos("Perim Min", "Parameters")
-        max_peri_selected = cv2.getTrackbarPos("Perim Max", "Parameters")
+        min_area_selected = cv2.getTrackbarPos("Area Min", constants.PARAMETERS_WINDOW_NAME)
+        max_area_selected = cv2.getTrackbarPos("Area Max", constants.PARAMETERS_WINDOW_NAME)
+        min_peri_selected = cv2.getTrackbarPos("Perim Min", constants.PARAMETERS_WINDOW_NAME)
+        max_peri_selected = cv2.getTrackbarPos("Perim Max", constants.PARAMETERS_WINDOW_NAME)
 
         if min_area_selected < area < max_area_selected:
             if min_peri_selected < perimeter < max_peri_selected:
                 return True
         return False
 
-    def __try_update_shapes(self, area, perim, cx, cy):
+    def __try_update_shapes(self, contour, area, perim, cx, cy):
         if self.countdown_state and self.countdown_value > 0:
-            self.__update_shapes(area, perim, cx, cy)
+            self.__update_shapes(contour, area, perim, cx, cy)
 
-    def __update_shapes(self, area, perim, cx, cy):
+    def __update_shapes(self, contour, area, perim, cx, cy):
         shape = self.__get_shape_if_exist(cx, cy)
         if shape is None:
-            shape = Shape(cx, cy)
+            shape = Shape(cx, cy, contour)
             self.shapes.append(shape)
         shape.try_add_area(area, cx, cy)
         shape.try_add_perim(perim, cx, cy)

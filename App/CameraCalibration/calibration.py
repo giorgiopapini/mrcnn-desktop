@@ -53,11 +53,11 @@ class Calibrator:
             self.__try_show_commands(img=img)
             self.__try_show_saved_message(img=img)
 
-            cv2.imshow("Camera Calibration", img)
+            cv2.imshow(constants.CALIBRATION_WINDOW_NAME, img)
 
             keys = cv2.waitKey(1) & 0xFF
             if keys == ord(constants.QUIT_CHAR):
-                cv2.destroyWindow("Camera Calibration")
+                cv2.destroyWindow(constants.CALIBRATION_WINDOW_NAME)
                 break
             if keys == ord(constants.SAVE_IMG_CHAR):
                 if not self.image_saving_state:
@@ -65,8 +65,10 @@ class Calibrator:
                         self.__save_image(img=real_img, index=index)
                         index += 1
                     else:
-                        cv2.destroyWindow("Camera Calibration")
+                        cv2.destroyWindow(constants.CALIBRATION_WINDOW_NAME)
                         break
+            elif cv2.getWindowProperty(constants.CALIBRATION_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
+                break
 
     def __manage_image_saving(self):
         if self.image_saving_state:
