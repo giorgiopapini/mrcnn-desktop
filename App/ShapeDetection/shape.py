@@ -1,10 +1,12 @@
 import cv2
+from decouple import config
 
-from App import constants
 from App.statistics_analyzer import StatisticsAnalyzer
 
 
 class Shape:
+    CENTER_BOUNDARY_PIXELS = int(config('CENTER_BOUNDARY_PIXELS'))
+
     areas = []
     area_raised_deviations = []
     perimeters = []
@@ -26,8 +28,8 @@ class Shape:
             self.perimeters.append(perim)
 
     def shape_respects_boundaries(self, cx, cy):
-        if self.x_center - constants.CENTER_BOUNDARY < cx < self.x_center + constants.CENTER_BOUNDARY:
-            if self.y_center - constants.CENTER_BOUNDARY < cy < self.y_center + constants.CENTER_BOUNDARY:
+        if self.x_center - self.CENTER_BOUNDARY_PIXELS < cx < self.x_center + self.CENTER_BOUNDARY_PIXELS:
+            if self.y_center - self.CENTER_BOUNDARY_PIXELS < cy < self.y_center + self.CENTER_BOUNDARY_PIXELS:
                 return True
             return False
         return False

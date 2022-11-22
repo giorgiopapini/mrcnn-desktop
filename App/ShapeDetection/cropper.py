@@ -1,8 +1,11 @@
 import cv2
 from datetime import datetime
+from decouple import config
 
 
 class Cropper:
+    PADDING_PIXELS = int(config('PADDING_PIXELS'))
+
     def __init__(self, original_img, shapes):
         self.original_img = original_img
         self.shapes = shapes
@@ -15,7 +18,10 @@ class Cropper:
     def __try_get_cropped_shape(self, shape):
         img = self.original_img.copy()
         x, y, w, h = shape.get_shape_bounding_box_data()
-        return img[y:y+h, x:x+w]
+        return img[
+               (y - self.PADDING_PIXELS):(y + h + self.PADDING_PIXELS),
+               (x - self.PADDING_PIXELS):(x + w + self.PADDING_PIXELS)
+               ]
 
     def __save_img(self, cropped_img):
         cv2.imshow(f"{datetime.now()}", cropped_img)

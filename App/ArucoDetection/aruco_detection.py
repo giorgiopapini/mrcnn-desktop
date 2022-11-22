@@ -1,12 +1,16 @@
 import json
 import numpy as np
-
 import cv2
-from App import constants
+from decouple import config
+
+import constants
 from App.Camera.camera_object import Camera
 
 
 class ArucoDetector:
+    SCAN_CHAR = config('SCAN_CHAR')
+    QUIT_CHAR = config('QUIT_CHAR')
+
     aruco_area_pixel = None
     is_aruco_located = False
     pixel_cm_squared_ratio = 0
@@ -17,7 +21,7 @@ class ArucoDetector:
         self.camera.try_calc_undistorted_camera_matrix()
 
         self.cap = cv2.VideoCapture(0)
-        self.cap.open(constants.ADDRESS)  # registra i dati dalla webcam del telefono
+        #self.cap.open(constants.ADDRESS)  # registra i dati dalla webcam del telefono
 
     def start(self):
         while True:
@@ -34,14 +38,13 @@ class ArucoDetector:
             self.__try_locate_aruco_marker(img=undistorted_img)
             self.__try_show_commands(img=undistorted_img)
             cv2.imshow(constants.ARUCO_DETECTION_WINDOW_NAME, undistorted_img)
-
             key_pressed = self.get_key_pressed()
-            if key_pressed == constants.SCAN_CHAR:
+            if key_pressed == self.SCAN_CHAR:
                 if self.is_aruco_located:
                     cv2.destroyWindow(constants.ARUCO_DETECTION_WINDOW_NAME)
                     self.__save_ratios_in_json()
                     break
-            elif key_pressed == constants.QUIT_CHAR:
+            elif key_pressed == self.QUIT_CHAR:
                 cv2.destroyWindow(constants.ARUCO_DETECTION_WINDOW_NAME)
                 break
             elif cv2.getWindowProperty(constants.ARUCO_DETECTION_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
@@ -50,7 +53,7 @@ class ArucoDetector:
     def __try_show_commands(self, img):
         cv2.putText(
             img,
-            f"Premi '{constants.QUIT_CHAR}' per uscire",
+            f"Premi '{self.QUIT_CHAR}' per uscire",
             (20, 45),
             cv2.FONT_HERSHEY_DUPLEX,
             .7,
@@ -60,7 +63,7 @@ class ArucoDetector:
         if self.is_aruco_located:
             cv2.putText(
                 img,
-                f"Premi '{constants.SCAN_CHAR}' per salvare",
+                f"Premi '{self.SCAN_CHAR}' per salvare",
                 (20, 70),
                 cv2.FONT_HERSHEY_DUPLEX,
                 .7,
@@ -104,10 +107,10 @@ class ArucoDetector:
     def get_key_pressed(self):
         keys = cv2.waitKey(1) & 0xFF
 
-        if keys == ord(constants.SCAN_CHAR):
-            return constants.SCAN_CHAR
-        elif keys == ord(constants.QUIT_CHAR):
-            return constants.QUIT_CHAR
+        if keys == ord(self.SCAN_CHAR) or keys == ord(self.SCAN_CHAR.upper()):
+            return self.QUIT_CHAR
+        elif keys == ord(self.QUIT_CHAR) or keys == ord(self.QUIT_CHAR.upper()):
+            return self.QUIT_CHAR
 
 
     def __save_ratios_in_json(self):

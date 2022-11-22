@@ -1,4 +1,5 @@
 from tkinter import *
+from decouple import config
 
 from App.ArucoDetection.aruco_detection import ArucoDetector
 from App.CameraCalibration.calibration import Calibrator
@@ -7,8 +8,8 @@ from App.ShapeDetection.shape_detection import ObjectDetector
 
 
 class HomePage:
-    BACKGROUND_IMG_PATH = "App/HomePage/background.png"
-    BUTTON_IMG_PATH = "App/HomePage/button_img.png"
+    BACKGROUND_IMG_PATH = "App/UI/HomePage/background.png"
+    BUTTON_IMG_PATH = "App/UI/HomePage/button_img.png"
 
     available = True
 
@@ -85,6 +86,7 @@ class HomePage:
         #print(object_detector.shapes[0].average_area)
         #print(len(object_detector.shapes))
         #print(object_detector.undistorted_img)
+        print(len(object_detector.shapes))
         self.crop_shapes_and_save(object_detector.undistorted_img, object_detector.shapes)
 
     def crop_shapes_and_save(self, original_img, shapes):
@@ -96,7 +98,9 @@ class HomePage:
         aruco_detector.start()
 
     def start_calibration(self):
-        cal = Calibrator(rows_num=6, cols_num=8)
+        cols = int(config('CHESSBOARD_COLS'))
+        rows = int(config('CHESSBOARD_ROWS'))
+        cal = Calibrator(rows_num=rows, cols_num=cols)
         cal.capture_images()
         #cal.calibrate()
 

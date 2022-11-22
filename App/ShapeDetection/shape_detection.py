@@ -2,7 +2,9 @@ import json
 import time
 import cv2
 import numpy as np
-from App import constants
+from decouple import config
+
+import constants
 from App.Camera.camera_object import Camera
 from App.ShapeDetection.shape import Shape
 
@@ -12,9 +14,12 @@ def empty(a):
 
 
 class ObjectDetector:
+    SCAN_CHAR = config('SCAN_CHAR')
+    QUIT_CHAR = config('QUIT_CHAR')
+
     undistorted_img = None
 
-    countdown_value = constants.SCAN_TIME
+    countdown_value = int(config('SCAN_TIME'))
     countdown_state = False
     current_time = None
     img_contour = None
@@ -34,7 +39,7 @@ class ObjectDetector:
         self.camera.try_calc_undistorted_camera_matrix()
 
         self.cap = cv2.VideoCapture(0)
-        self.cap.open(constants.ADDRESS)  # registra i dati dalla webcam del telefono
+        #self.cap.open(constants.ADDRESS)  # registra i dati dalla webcam del telefono
         self.__try_load_ratios()
         self.__create_parameters_window()
 
@@ -90,7 +95,7 @@ class ObjectDetector:
 
             cv2.imshow(constants.SHAPE_DETECTION_WINDOW_NAME, self.img_contour)  # renderizza l'immagine
 
-            if self.get_pressed_key() == constants.QUIT_CHAR:
+            if self.get_pressed_key() == self.QUIT_CHAR:
                 cv2.destroyWindow(constants.PARAMETERS_WINDOW_NAME)
                 cv2.destroyWindow(constants.SHAPE_DETECTION_WINDOW_NAME)
                 break
@@ -105,7 +110,7 @@ class ObjectDetector:
         if not self.countdown_state:
             cv2.putText(
                 img,
-                f"Premi '{constants.SCAN_CHAR}' per avviare la scansione",
+                f"Premi '{self.SCAN_CHAR}' per avviare la scansione",
                 (20, 20),
                 cv2.FONT_HERSHEY_DUPLEX,
                 .7,
@@ -114,7 +119,7 @@ class ObjectDetector:
             )
             cv2.putText(
                 img,
-                f"Premi '{constants.QUIT_CHAR}' per uscire",
+                f"Premi '{self.QUIT_CHAR}' per uscire",
                 (20, 45),
                 cv2.FONT_HERSHEY_DUPLEX,
                 .7,
@@ -137,7 +142,7 @@ class ObjectDetector:
         elif self.countdown_value == 0:
             cv2.putText(
                 img,
-                f"Scansione completata! (premi '{constants.QUIT_CHAR}' per i risultati)",
+                f"Scansione completata! (premi '{self.QUIT_CHAR}' per i risultati)",
                 (20, 32),
                 cv2.FONT_HERSHEY_DUPLEX,
                 .7,
@@ -266,13 +271,13 @@ class ObjectDetector:
     def get_pressed_key(self):
         keys = cv2.waitKey(1) & 0xFF
 
-        if keys == ord(constants.QUIT_CHAR):
+        if keys == ord(self.QUIT_CHAR) or keys == ord(self.QUIT_CHAR.upper()):
             if self.countdown_value == 0:
                 self.__obtain_results()
-                return constants.QUIT_CHAR
+                return self.QUIT_CHAR
             elif self.countdown_state is False:
-                return constants.QUIT_CHAR
-        elif keys == ord(constants.SCAN_CHAR):
+                return self.QUIT_CHAR
+        elif keys == ord(self.SCAN_CHAR) or keys == ord(self.SCAN_CHAR.upper()):
             if self.pixel_cm_squared_ratio != 'undefined' and self.pixel_cm_ratio != 'undefined':
                 self.__try_start_countdown()
 

@@ -4,7 +4,9 @@ import os
 import glob
 import time
 import json
-from App import constants
+from decouple import config
+
+import constants
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -18,6 +20,10 @@ criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
 
 class Calibrator:
+    QUIT_CHAR = config('QUIT_CHAR')
+    SAVE_IMG_CHAR = config('SAVE_IMG_CHAR')
+    CALIBRATION_IMAGES_NEEDED = int(config('CALIBRATION_IMAGES_NEEDED'))
+
     objpoints = []
     imgpoints = []
     images = []
@@ -47,7 +53,6 @@ class Calibrator:
 
             img = real_img.copy()
             img = cv2.resize(img, None, None, fx=0.5, fy=0.5)
-            #img = cv2.resize(img, (constants.FRAME_WIDTH, constants.FRAME_HEIGHT), None, fx=0.5, fy=0.5)
 
             self.__manage_image_saving()
             self.__try_show_commands(img=img)
@@ -56,12 +61,12 @@ class Calibrator:
             cv2.imshow(constants.CALIBRATION_WINDOW_NAME, img)
 
             keys = cv2.waitKey(1) & 0xFF
-            if keys == ord(constants.QUIT_CHAR):
+            if keys == ord(self.QUIT_CHAR) or keys == ord(self.QUIT_CHAR.upper()):
                 cv2.destroyWindow(constants.CALIBRATION_WINDOW_NAME)
                 break
-            if keys == ord(constants.SAVE_IMG_CHAR):
+            if keys == ord(self.SAVE_IMG_CHAR) or keys == ord(self.SAVE_IMG_CHAR.upper()):
                 if not self.image_saving_state:
-                    if index < constants.CALIBRATION_IMAGES_NEEDED:
+                    if index < self.CALIBRATION_IMAGES_NEEDED:
                         self.__save_image(img=real_img, index=index)
                         index += 1
                     else:
@@ -79,7 +84,7 @@ class Calibrator:
         if not self.image_saving_state:
             cv2.putText(
                 img,
-                f"Premi '{constants.SAVE_IMG_CHAR}' per salvare l'immagine",
+                f"Premi '{self.SAVE_IMG_CHAR}' per salvare l'immagine",
                 (20, 20),
                 cv2.FONT_HERSHEY_DUPLEX,
                 .7,
@@ -88,7 +93,7 @@ class Calibrator:
             )
             cv2.putText(
                 img,
-                f"Premi '{constants.QUIT_CHAR}' per uscire",
+                f"Premi '{self.QUIT_CHAR}' per uscire",
                 (20, 45),
                 cv2.FONT_HERSHEY_DUPLEX,
                 .7,
