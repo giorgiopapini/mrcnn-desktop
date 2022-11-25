@@ -5,18 +5,22 @@ from App.ArucoDetection.aruco_detection import ArucoDetector
 from App.CameraCalibration.calibration import Calibrator
 from App.ShapeDetection.cropper import Cropper
 from App.ShapeDetection.shape_detection import ObjectDetector
+from App.UI.Settings.settings_page import SettingsPage
+from App.UI.page import Page
 
 
-class HomePage:
+class HomePage(Page):
     BACKGROUND_IMG_PATH = "App/UI/HomePage/background.png"
     BUTTON_IMG_PATH = "App/UI/HomePage/button_img.png"
+    SETTINGS_BTN_IMG = "App/UI/HomePage/settings_btn.png"
 
     available = True
 
-    def __init__(self, root):
-        self.root = root
+    def __init__(self, root, **kwargs):
+        super().__init__(root, **kwargs)
         self.background_img = PhotoImage(file=self.BACKGROUND_IMG_PATH)
         self.button_img = PhotoImage(file=self.BUTTON_IMG_PATH)
+        self.settings_btn_img = PhotoImage(file=self.SETTINGS_BTN_IMG)
 
         self.canvas = Canvas(
             self.root,
@@ -76,6 +80,23 @@ class HomePage:
             x=576, y=293,
             width=90,
             height=39
+        )
+
+        self.settings_btn = Button(
+            image=self.settings_btn_img,
+            borderwidth=0,
+            highlightthickness=0,
+            command=lambda: self.to_page(
+                page=SettingsPage
+            ),
+            relief="flat",
+            cursor="hand2"
+        )
+
+        self.settings_btn.place(
+            x=674, y=441,
+            width=118,
+            height=31
         )
 
     def start_obj_detection(self):
