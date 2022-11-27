@@ -1,6 +1,8 @@
 from tkinter import *
 from decouple import config
 
+import constants
+from App.UI.Common.FormField import FormField
 from App.UI.page import Page
 
 
@@ -12,6 +14,7 @@ class SettingsPage(Page):
     MEDIUM_FIELD_PATH = "App/UI/Settings/medium.png"
     LONG_FIELD_PATH = "App/UI/Settings/long.png"
     BACK_ARROW_IMG_PATH = "App/UI/Settings/back_arrow.png"
+    SAVE_BTN_IMG_PATH = "App/UI/Settings/save.png"
 
     def __init__(self, root, **kwargs):
         super().__init__(root, **kwargs)
@@ -22,6 +25,7 @@ class SettingsPage(Page):
         self.medium_field_img = PhotoImage(file=self.MEDIUM_FIELD_PATH)
         self.long_field_img = PhotoImage(file=self.LONG_FIELD_PATH)
         self.back_arrow_img = PhotoImage(file=self.BACK_ARROW_IMG_PATH)
+        self.save_btn_img = PhotoImage(file=self.SAVE_BTN_IMG_PATH)
 
         self.canvas = Canvas(
             self.root,
@@ -118,7 +122,9 @@ class SettingsPage(Page):
             image=self.back_arrow_img,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=lambda: self.to_page(
+                page=self.previous_page
+            ),
             relief="flat",
             cursor="hand2"
         )
@@ -129,12 +135,30 @@ class SettingsPage(Page):
             height=38
         )
 
+        self.save_btn = Button(
+            image=self.save_btn_img,
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.__try_save_new_env_variables,
+            relief="flat",
+            cursor="hand2"
+        )
+
+        self.save_btn.place(
+            x=351, y=51,
+            width=90,
+            height=39
+        )
+
         self.start_scan_char_field = self.canvas.create_image(
             297.0, 192.5,
             image=self.medium_field_img
         )
 
-        self.start_scan_char_field = Entry(
+        self.start_scan_char_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.CHAR,
+            initial_text=config('SCAN_CHAR'),
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -152,7 +176,10 @@ class SettingsPage(Page):
             image=self.medium_field_img
         )
 
-        self.stop_camera_char_field = Entry(
+        self.stop_camera_char_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.CHAR,
+            initial_text=config('QUIT_CHAR'),
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -170,7 +197,10 @@ class SettingsPage(Page):
             image=self.long_field_img
         )
 
-        self.camera_address_info = Entry(
+        self.camera_address_info = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.STR,
+            initial_text=config('ADDRESS'),
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -188,7 +218,10 @@ class SettingsPage(Page):
             image=self.short_field_img
         )
 
-        self.aruco_area_field = Entry(
+        self.aruco_area_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.INT,
+            initial_text=config('ARUCO_AREA_IN_CM'),
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -206,7 +239,10 @@ class SettingsPage(Page):
             image=self.short_field_img
         )
 
-        self.scan_duration_field = Entry(
+        self.scan_duration_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.INT,
+            initial_text=config('SCAN_TIME'),
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -224,7 +260,10 @@ class SettingsPage(Page):
             image=self.extra_short_field_img
         )
 
-        self.padding_field = Entry(
+        self.padding_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.INT,
+            initial_text=config('PADDING_PIXELS'),
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -242,7 +281,10 @@ class SettingsPage(Page):
             image=self.short_field_img
         )
 
-        self.center_boundary_field = Entry(
+        self.center_boundary_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.INT,
+            initial_text=config('CENTER_BOUNDARY_PIXELS'),
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -260,7 +302,10 @@ class SettingsPage(Page):
             image=self.medium_field_img
         )
 
-        self.chessboard_cols_field = Entry(
+        self.chessboard_cols_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.INT,
+            initial_text=config('CHESSBOARD_COLS'),
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -278,7 +323,10 @@ class SettingsPage(Page):
             image=self.medium_field_img
         )
 
-        self.chessboard_rows_field = Entry(
+        self.chessboard_rows_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.INT,
+            initial_text=config('CHESSBOARD_ROWS'),
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -296,7 +344,10 @@ class SettingsPage(Page):
             image=self.medium_field_img
         )
 
-        self.calibration_images_needed_field = Entry(
+        self.calibration_images_needed_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.INT,
+            initial_text=config('CALIBRATION_IMAGES_NEEDED'),
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -314,7 +365,10 @@ class SettingsPage(Page):
             image=self.medium_field_img
         )
 
-        self.save_img_char_field = Entry(
+        self.save_img_char_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.CHAR,
+            initial_text=config('SAVE_IMG_CHAR'),
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -326,21 +380,6 @@ class SettingsPage(Page):
             width=70,
             height=19
         )
-
-        self.__load_env_variables()
-
-    def __load_env_variables(self):
-        self.start_scan_char_field.insert(0, config('SCAN_CHAR'))
-        self.stop_camera_char_field.insert(0, config('QUIT_CHAR'))
-        self.camera_address_info.insert(0, config('ADDRESS'))
-        self.aruco_area_field.insert(0, config('ARUCO_AREA_IN_CM'))
-        self.scan_duration_field.insert(0, config('SCAN_TIME'))
-        self.center_boundary_field.insert(0, config('CENTER_BOUNDARY_PIXELS'))
-        self.padding_field.insert(0, config('PADDING_PIXELS'))
-        self.chessboard_cols_field.insert(0, config('CHESSBOARD_COLS'))
-        self.chessboard_rows_field.insert(0, config('CHESSBOARD_ROWS'))
-        self.calibration_images_needed_field.insert(0, config('CALIBRATION_IMAGES_NEEDED'))
-        self.save_img_char_field.insert(0, config('SAVE_IMG_CHAR'))
 
     def __try_save_new_env_variables(self):
         pass

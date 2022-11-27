@@ -87,7 +87,8 @@ class HomePage(Page):
             borderwidth=0,
             highlightthickness=0,
             command=lambda: self.to_page(
-                page=SettingsPage
+                page=SettingsPage,
+                previous_page=HomePage
             ),
             relief="flat",
             cursor="hand2"
