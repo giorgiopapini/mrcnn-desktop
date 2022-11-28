@@ -1,8 +1,9 @@
+import math
 from tkinter import *
-from decouple import config
 
 import constants
 from App.UI.Common.FormField import FormField
+from App.UI.Common.SettingsDecoder import SettingsDecoder
 from App.UI.page import Page
 
 
@@ -158,7 +159,7 @@ class SettingsPage(Page):
         self.start_scan_char_field = FormField(
             root=self.root,
             input_type=constants.DataTypes.CHAR,
-            initial_text=config('SCAN_CHAR'),
+            setting='SCAN_CHAR',
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -179,7 +180,7 @@ class SettingsPage(Page):
         self.stop_camera_char_field = FormField(
             root=self.root,
             input_type=constants.DataTypes.CHAR,
-            initial_text=config('QUIT_CHAR'),
+            setting='QUIT_CHAR',
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -200,7 +201,7 @@ class SettingsPage(Page):
         self.camera_address_info = FormField(
             root=self.root,
             input_type=constants.DataTypes.STR,
-            initial_text=config('ADDRESS'),
+            setting='ADDRESS',
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -221,7 +222,7 @@ class SettingsPage(Page):
         self.aruco_area_field = FormField(
             root=self.root,
             input_type=constants.DataTypes.INT,
-            initial_text=config('ARUCO_AREA_IN_CM'),
+            setting='ARUCO_AREA_IN_CM',
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -242,7 +243,7 @@ class SettingsPage(Page):
         self.scan_duration_field = FormField(
             root=self.root,
             input_type=constants.DataTypes.INT,
-            initial_text=config('SCAN_TIME'),
+            setting='SCAN_TIME',
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -263,7 +264,7 @@ class SettingsPage(Page):
         self.padding_field = FormField(
             root=self.root,
             input_type=constants.DataTypes.INT,
-            initial_text=config('PADDING_PIXELS'),
+            setting='PADDING_PIXELS',
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -284,7 +285,7 @@ class SettingsPage(Page):
         self.center_boundary_field = FormField(
             root=self.root,
             input_type=constants.DataTypes.INT,
-            initial_text=config('CENTER_BOUNDARY_PIXELS'),
+            setting='CENTER_BOUNDARY_PIXELS',
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -305,7 +306,7 @@ class SettingsPage(Page):
         self.chessboard_cols_field = FormField(
             root=self.root,
             input_type=constants.DataTypes.INT,
-            initial_text=config('CHESSBOARD_COLS'),
+            setting='CHESSBOARD_COLS',
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -326,7 +327,7 @@ class SettingsPage(Page):
         self.chessboard_rows_field = FormField(
             root=self.root,
             input_type=constants.DataTypes.INT,
-            initial_text=config('CHESSBOARD_ROWS'),
+            setting='CHESSBOARD_ROWS',
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -347,7 +348,7 @@ class SettingsPage(Page):
         self.calibration_images_needed_field = FormField(
             root=self.root,
             input_type=constants.DataTypes.INT,
-            initial_text=config('CALIBRATION_IMAGES_NEEDED'),
+            setting='CALIBRATION_IMAGES_NEEDED',
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -368,7 +369,7 @@ class SettingsPage(Page):
         self.save_img_char_field = FormField(
             root=self.root,
             input_type=constants.DataTypes.CHAR,
-            initial_text=config('SAVE_IMG_CHAR'),
+            setting='SAVE_IMG_CHAR',
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -382,10 +383,22 @@ class SettingsPage(Page):
         )
 
     def __try_save_new_env_variables(self):
-        pass
+        self.start_scan_char_field.update_setting()
+        self.stop_camera_char_field.update_setting()
+        self.camera_address_info.update_setting()
+        self.aruco_area_field.update_setting()
+        perim = math.sqrt(float(self.aruco_area_field.get())) * 4
+        SettingsDecoder.set_attribute('ARUCO_PERIM_IN_CM', perim)
+        self.scan_duration_field.update_setting()
+        self.padding_field.update_setting()
+        self.center_boundary_field.update_setting()
+        self.chessboard_cols_field.update_setting()
+        self.chessboard_rows_field.update_setting()
+        self.calibration_images_needed_field.update_setting()
+        self.save_img_char_field.update_setting()
 
-    def __save_new_env_variables(self):
-        pass
+        SettingsDecoder.save_current_settings_to_json()
+        self.to_page(page=self.previous_page)
 
     def btn_clicked(self):
         pass

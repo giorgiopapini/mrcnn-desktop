@@ -1,12 +1,11 @@
 import json
 import time
 import cv2
-import numpy as np
-from decouple import config
 
 import constants
 from App.Camera.camera_object import Camera
 from App.ShapeDetection.shape import Shape
+from App.UI.Common.SettingsDecoder import SettingsDecoder
 
 
 def empty(a):
@@ -14,12 +13,8 @@ def empty(a):
 
 
 class ObjectDetector:
-    SCAN_CHAR = config('SCAN_CHAR')
-    QUIT_CHAR = config('QUIT_CHAR')
-
     undistorted_img = None
 
-    countdown_value = int(config('SCAN_TIME'))
     countdown_state = False
     current_time = None
     img_contour = None
@@ -27,19 +22,20 @@ class ObjectDetector:
     pixel_cm_squared_ratio = 0
     pixel_cm_ratio = 0
 
-    total_area_pixel = 0
-    total_perimeter_pixel = 0
-
     shapes = []
 
     def __init__(self):
+        self.SCAN_CHAR = SettingsDecoder['SCAN_CHAR']
+        self.QUIT_CHAR = SettingsDecoder['QUIT_CHAR']
+        self.countdown_value = SettingsDecoder['SCAN_TIME']
+
         self.current_time = time.time()
 
         self.camera = Camera()
         self.camera.try_calc_undistorted_camera_matrix()
 
         self.cap = cv2.VideoCapture(0)
-        #self.cap.open(constants.ADDRESS)  # registra i dati dalla webcam del telefono
+        self.cap.open(SettingsDecoder['ADDRESS'])  # registra i dati dalla webcam del telefono
         self.__try_load_ratios()
         self.__create_parameters_window()
 
@@ -85,13 +81,10 @@ class ObjectDetector:
             threshold2 = cv2.getTrackbarPos("Threshold2", constants.PARAMETERS_WINDOW_NAME)
             img_canny = cv2.Canny(img_gray, threshold1, threshold2)
 
-            kernel = np.ones((5, 5))
-            img_dil = cv2.dilate(img_canny, kernel, iterations=1)
-
             self.img_contour = self.undistorted_img.copy()
             self.__try_show_commmands(img=self.img_contour)
             self.__try_manage_countdown(img=self.img_contour)
-            self.get_contours(img_dil, self.img_contour)
+            self.get_contours(img_canny, self.img_contour)
 
             cv2.imshow(constants.SHAPE_DETECTION_WINDOW_NAME, self.img_contour)  # renderizza l'immagine
 
@@ -136,7 +129,7 @@ class ObjectDetector:
                 (20, 32),
                 cv2.FONT_HERSHEY_DUPLEX,
                 .7,
-                (0, 255, 255),
+                (255, 0, 0),
                 2
             )
         elif self.countdown_value == 0:
@@ -171,8 +164,15 @@ class ObjectDetector:
                     x, y, w, h = cv2.boundingRect(approx)
                     cv2.rectangle(img_contour, (x, y), (x + w, y + h), (0, 255, 0), 5)
 
-                    cv2.putText(img_contour, f"x({cx}), y({cy})", (cx - 20, cy - 20),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
+                    cv2.putText(
+                        img_contour,
+                        f"x({cx}), y({cy})",
+                        (cx - 20, cy - 20),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        (0, 120, 255),
+                        2
+                    )
 
                     cv2.putText(
                         img_contour,

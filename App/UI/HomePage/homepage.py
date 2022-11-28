@@ -1,10 +1,9 @@
 from tkinter import *
-from decouple import config
-
 from App.ArucoDetection.aruco_detection import ArucoDetector
 from App.CameraCalibration.calibration import Calibrator
 from App.ShapeDetection.cropper import Cropper
 from App.ShapeDetection.shape_detection import ObjectDetector
+from App.UI.Common.SettingsDecoder import SettingsDecoder
 from App.UI.Settings.settings_page import SettingsPage
 from App.UI.page import Page
 
@@ -104,11 +103,12 @@ class HomePage(Page):
         self.__set_button_state(False)
         object_detector = ObjectDetector()
         object_detector.start()
-        #print(object_detector.total_area_pixel / object_detector.pixel_cm_squared_ratio)
-        #print(object_detector.shapes[0].average_area)
-        #print(len(object_detector.shapes))
-        #print(object_detector.undistorted_img)
-        print(len(object_detector.shapes))
+
+        for shape in object_detector.shapes:
+            print(f"area: {shape.average_area / object_detector.pixel_cm_squared_ratio}")
+            print(f"perimeter: {shape.average_perim / object_detector.pixel_cm_ratio}")
+            print("================")
+
         self.crop_shapes_and_save(object_detector.undistorted_img, object_detector.shapes)
 
     def crop_shapes_and_save(self, original_img, shapes):
@@ -120,8 +120,8 @@ class HomePage(Page):
         aruco_detector.start()
 
     def start_calibration(self):
-        cols = int(config('CHESSBOARD_COLS'))
-        rows = int(config('CHESSBOARD_ROWS'))
+        cols = SettingsDecoder['CHESSBOARD_COLS']
+        rows = SettingsDecoder['CHESSBOARD_ROWS']
         cal = Calibrator(rows_num=rows, cols_num=cols)
         cal.capture_images()
         #cal.calibrate()

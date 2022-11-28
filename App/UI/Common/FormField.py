@@ -1,14 +1,16 @@
 from tkinter import *
 import constants
+from App.UI.Common.SettingsDecoder import SettingsDecoder
 
 
 class FormField(Entry):
-    def __init__(self, root=None, input_type=constants.DataTypes.INT, initial_text='', **kwargs):
+    def __init__(self, root=None, input_type=constants.DataTypes.INT, setting='', **kwargs):
         super().__init__(**kwargs)
         self.root = root
         self.input_type = input_type.value
 
-        self.initial_text = initial_text
+        self.setting = setting
+        self.initial_text = SettingsDecoder[self.setting]
         self.insert(0, self.initial_text)
 
         self.bind("<KeyRelease>", self.__get_input)
@@ -22,3 +24,7 @@ class FormField(Entry):
         if not is_text_valid:
             self.delete(0, END)
             self.insert(0, self.initial_text)
+
+    def update_setting(self):
+        converted_data = self.input_type.get_converted_data(self.get())
+        SettingsDecoder.set_attribute(self.setting, converted_data)

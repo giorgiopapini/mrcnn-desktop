@@ -1,12 +1,10 @@
 import cv2
-from decouple import config
 
+from App.UI.Common.SettingsDecoder import SettingsDecoder
 from App.statistics_analyzer import StatisticsAnalyzer
 
 
 class Shape:
-    CENTER_BOUNDARY_PIXELS = int(config('CENTER_BOUNDARY_PIXELS'))
-
     areas = []
     area_raised_deviations = []
     perimeters = []
@@ -15,6 +13,7 @@ class Shape:
     average_perim = 0
 
     def __init__(self, x_center, y_center, contour):
+        self.CENTER_BOUNDARY_PIXELS = SettingsDecoder['CENTER_BOUNDARY_PIXELS']
         self.x_center = x_center
         self.y_center = y_center
         self.contour = contour

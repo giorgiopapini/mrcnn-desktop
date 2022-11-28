@@ -1,12 +1,12 @@
 import cv2
 from datetime import datetime
-from decouple import config
+
+from App.UI.Common.SettingsDecoder import SettingsDecoder
 
 
 class Cropper:
-    PADDING_PIXELS = int(config('PADDING_PIXELS'))
-
     def __init__(self, original_img, shapes):
+        self.PADDING_PIXELS = SettingsDecoder['PADDING_PIXELS']
         self.original_img = original_img
         self.shapes = shapes
 

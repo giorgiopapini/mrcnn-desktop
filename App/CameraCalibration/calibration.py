@@ -4,9 +4,9 @@ import os
 import glob
 import time
 import json
-from decouple import config
 
 import constants
+from App.UI.Common.SettingsDecoder import SettingsDecoder
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -20,10 +20,6 @@ criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
 
 class Calibrator:
-    QUIT_CHAR = config('QUIT_CHAR')
-    SAVE_IMG_CHAR = config('SAVE_IMG_CHAR')
-    CALIBRATION_IMAGES_NEEDED = int(config('CALIBRATION_IMAGES_NEEDED'))
-
     objpoints = []
     imgpoints = []
     images = []
@@ -32,6 +28,10 @@ class Calibrator:
     current_time = None
 
     def __init__(self, rows_num, cols_num):
+        self.QUIT_CHAR = SettingsDecoder['QUIT_CHAR']
+        self.SAVE_IMG_CHAR = SettingsDecoder['SAVE_IMG_CHAR']
+        self.CALIBRATION_IMAGES_NEEDED = SettingsDecoder['CALIBRATION_IMAGES_NEEDED']
+
         self.rows = rows_num - 1
         self.cols = cols_num - 1
 

@@ -1,27 +1,26 @@
 import json
 import numpy as np
 import cv2
-from decouple import config
 
 import constants
 from App.Camera.camera_object import Camera
+from App.UI.Common.SettingsDecoder import SettingsDecoder
 
 
 class ArucoDetector:
-    SCAN_CHAR = config('SCAN_CHAR')
-    QUIT_CHAR = config('QUIT_CHAR')
-
     aruco_area_pixel = None
     is_aruco_located = False
     pixel_cm_squared_ratio = 0
     pixel_cm_ratio = 0
 
     def __init__(self):
+        self.SCAN_CHAR = SettingsDecoder['SCAN_CHAR']
+        self.QUIT_CHAR = SettingsDecoder['QUIT_CHAR']
         self.camera = Camera()
         self.camera.try_calc_undistorted_camera_matrix()
 
         self.cap = cv2.VideoCapture(0)
-        #self.cap.open(constants.ADDRESS)  # registra i dati dalla webcam del telefono
+        self.cap.open(SettingsDecoder['ADDRESS'])  # registra i dati dalla webcam del telefono
 
     def start(self):
         while True:
@@ -80,8 +79,9 @@ class ArucoDetector:
             cv2.polylines(img, internal_corners, True, (0, 255, 0), 5)
             self.aruco_area_pixel = cv2.contourArea(corners[0], True)
             self.aruco_perim_pixel = cv2.arcLength(corners[0], True)
-            self.pixel_cm_squared_ratio = self.aruco_area_pixel / constants.ARUCO_AREA_IN_CM
-            self.pixel_cm_ratio = self.aruco_perim_pixel / constants.ARUCO_PERIM_IN_CM
+
+            self.pixel_cm_squared_ratio = self.aruco_area_pixel / SettingsDecoder['ARUCO_AREA_IN_CM']
+            self.pixel_cm_ratio = self.aruco_perim_pixel / SettingsDecoder['ARUCO_PERIM_IN_CM']
             cv2.putText(
                 img,
                 "Aruco marker localizzato!",
@@ -108,10 +108,9 @@ class ArucoDetector:
         keys = cv2.waitKey(1) & 0xFF
 
         if keys == ord(self.SCAN_CHAR) or keys == ord(self.SCAN_CHAR.upper()):
-            return self.QUIT_CHAR
+            return self.SCAN_CHAR
         elif keys == ord(self.QUIT_CHAR) or keys == ord(self.QUIT_CHAR.upper()):
             return self.QUIT_CHAR
-
 
     def __save_ratios_in_json(self):
         with open("App/Camera/ratios.json", 'w') as file:
