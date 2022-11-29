@@ -5,18 +5,16 @@ from App.statistics_analyzer import StatisticsAnalyzer
 
 
 class Shape:
-    areas = []
-    area_raised_deviations = []
-    perimeters = []
-    perim_raised_deviations = []
-    average_area = 0
-    average_perim = 0
-
     def __init__(self, x_center, y_center, contour):
-        self.CENTER_BOUNDARY_PIXELS = SettingsDecoder['CENTER_BOUNDARY_PIXELS']
         self.x_center = x_center
         self.y_center = y_center
         self.contour = contour
+        self.areas = []
+        self.area_raised_deviations = []
+        self.perimeters = []
+        self.perim_raised_deviations = []
+        self.average_area = 0
+        self.average_perim = 0
 
     def try_add_area(self, area, cx, cy):
         if self.shape_respects_boundaries(cx, cy):
@@ -27,8 +25,8 @@ class Shape:
             self.perimeters.append(perim)
 
     def shape_respects_boundaries(self, cx, cy):
-        if self.x_center - self.CENTER_BOUNDARY_PIXELS < cx < self.x_center + self.CENTER_BOUNDARY_PIXELS:
-            if self.y_center - self.CENTER_BOUNDARY_PIXELS < cy < self.y_center + self.CENTER_BOUNDARY_PIXELS:
+        if self.x_center - SettingsDecoder['CENTER_BOUNDARY_PIXELS'] < cx < self.x_center + SettingsDecoder['CENTER_BOUNDARY_PIXELS']:
+            if self.y_center - SettingsDecoder['CENTER_BOUNDARY_PIXELS'] < cy < self.y_center + SettingsDecoder['CENTER_BOUNDARY_PIXELS']:
                 return True
             return False
         return False

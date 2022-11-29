@@ -22,6 +22,9 @@ class ObjectDetector:
     pixel_cm_squared_ratio = 0
     pixel_cm_ratio = 0
 
+    total_area_pixel = 0
+    total_perimeter_pixel = 0
+
     shapes = []
 
     def __init__(self):
@@ -79,12 +82,16 @@ class ObjectDetector:
 
             threshold1 = cv2.getTrackbarPos("Threshold1", constants.PARAMETERS_WINDOW_NAME)
             threshold2 = cv2.getTrackbarPos("Threshold2", constants.PARAMETERS_WINDOW_NAME)
-            img_canny = cv2.Canny(img_gray, threshold1, threshold2)
+            #img_canny = cv2.Canny(img_gray, threshold1, threshold2)
+            img_thresh = cv2.threshold(img_gray, threshold1, threshold2, cv2.THRESH_BINARY_INV)[1]
+
+            #cv2.imshow('canny', img_canny)
+            cv2.imshow('Thresh', img_thresh)
 
             self.img_contour = self.undistorted_img.copy()
             self.__try_show_commmands(img=self.img_contour)
             self.__try_manage_countdown(img=self.img_contour)
-            self.get_contours(img_canny, self.img_contour)
+            self.get_contours(img_thresh, self.img_contour)
 
             cv2.imshow(constants.SHAPE_DETECTION_WINDOW_NAME, self.img_contour)  # renderizza l'immagine
 
@@ -149,7 +156,7 @@ class ObjectDetector:
             self.countdown_value -= 1
 
     def get_contours(self, img, img_contour):
-        contours, hierachy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        contours, hierachy = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)  #RETR_CCOMP
         for cnt in contours:
             area = cv2.contourArea(cnt)
             peri = cv2.arcLength(cnt, True)
