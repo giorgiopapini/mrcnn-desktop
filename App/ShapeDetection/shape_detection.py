@@ -82,11 +82,9 @@ class ObjectDetector:
 
             threshold1 = cv2.getTrackbarPos("Threshold1", constants.PARAMETERS_WINDOW_NAME)
             threshold2 = cv2.getTrackbarPos("Threshold2", constants.PARAMETERS_WINDOW_NAME)
-            #img_canny = cv2.Canny(img_gray, threshold1, threshold2)
-            img_thresh = cv2.threshold(img_gray, threshold1, threshold2, cv2.THRESH_BINARY_INV)[1]
 
-            #cv2.imshow('canny', img_canny)
-            cv2.imshow('Thresh', img_thresh)
+            img_thresh = cv2.threshold(img_gray, threshold1, threshold2, cv2.THRESH_BINARY_INV)[1]
+            cv2.imshow(constants.THRESHOLD_WINDOW_NAME, img_thresh)
 
             self.img_contour = self.undistorted_img.copy()
             self.__try_show_commmands(img=self.img_contour)
@@ -98,13 +96,20 @@ class ObjectDetector:
             if self.get_pressed_key() == self.QUIT_CHAR:
                 cv2.destroyWindow(constants.PARAMETERS_WINDOW_NAME)
                 cv2.destroyWindow(constants.SHAPE_DETECTION_WINDOW_NAME)
-                break
+                cv2.destroyWindow(constants.THRESHOLD_WINDOW_NAME)
+                return True
             elif cv2.getWindowProperty(constants.SHAPE_DETECTION_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
                 cv2.destroyWindow(constants.PARAMETERS_WINDOW_NAME)
-                break
+                cv2.destroyWindow(constants.THRESHOLD_WINDOW_NAME)
+                return False
+            elif cv2.getWindowProperty(constants.THRESHOLD_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
+                cv2.destroyWindow(constants.PARAMETERS_WINDOW_NAME)
+                cv2.destroyWindow(constants.SHAPE_DETECTION_WINDOW_NAME)
+                return False
             elif cv2.getWindowProperty(constants.PARAMETERS_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
                 cv2.destroyWindow(constants.SHAPE_DETECTION_WINDOW_NAME)
-                break
+                cv2.destroyWindow(constants.THRESHOLD_WINDOW_NAME)
+                return False
 
     def __try_show_commmands(self, img):
         if not self.countdown_state:

@@ -10,10 +10,14 @@ class Cropper:
         self.original_img = original_img
         self.shapes = shapes
 
-    def crop_shapes(self):
+    def get_cropped_shapes(self):
+        cropped_shapes = []
         for shape in self.shapes:
             cropped_img = self.__try_get_cropped_shape(shape)
-            self.__save_img(cropped_img)
+            cropped_shapes.append(
+                (cropped_img, datetime.now())
+            )
+        return cropped_shapes
 
     def __try_get_cropped_shape(self, shape):
         img = self.original_img.copy()
@@ -22,7 +26,3 @@ class Cropper:
                (y - self.PADDING_PIXELS):(y + h + self.PADDING_PIXELS),
                (x - self.PADDING_PIXELS):(x + w + self.PADDING_PIXELS)
                ]
-
-    def __save_img(self, cropped_img):
-        cv2.imshow(f"{datetime.now()}", cropped_img)
-

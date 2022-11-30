@@ -4,6 +4,7 @@ from App.CameraCalibration.calibration import Calibrator
 from App.ShapeDetection.cropper import Cropper
 from App.ShapeDetection.shape_detection import ObjectDetector
 from App.UI.Common.SettingsDecoder import SettingsDecoder
+from App.UI.Recap.recap_page import RecapPage
 from App.UI.Settings.settings_page import SettingsPage
 from App.UI.page import Page
 
@@ -102,18 +103,24 @@ class HomePage(Page):
     def start_obj_detection(self):
         self.__set_button_state(False)
         object_detector = ObjectDetector()
-        object_detector.start()
+        status = object_detector.start()
 
-        for shape in object_detector.shapes:
-            print(f"area: {shape.average_area / object_detector.pixel_cm_squared_ratio}")
-            print(f"perimeter: {shape.average_perim / object_detector.pixel_cm_ratio}")
-            print("================")
+        if status is True:
+            for shape in object_detector.shapes:
+                print(f"area: {shape.average_area / object_detector.pixel_cm_squared_ratio}")
+                print(f"perimeter: {shape.average_perim / object_detector.pixel_cm_ratio}")
+                print("================")
 
-        self.crop_shapes_and_save(object_detector.undistorted_img, object_detector.shapes)
+            cropped_images = self.crop_shapes(object_detector.undistorted_img, object_detector.shapes)
+            self.to_page(
+                page=RecapPage,
+                previous_page=HomePage,
+                cropped_images=cropped_images
+            )
 
-    def crop_shapes_and_save(self, original_img, shapes):
+    def crop_shapes(self, original_img, shapes):
         cropper = Cropper(original_img, shapes)
-        cropper.crop_shapes()
+        return cropper.get_cropped_shapes()
 
     def start_aruco_marker_detection(self):
         aruco_detector = ArucoDetector()
