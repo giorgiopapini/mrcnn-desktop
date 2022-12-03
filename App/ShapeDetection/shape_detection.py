@@ -38,7 +38,8 @@ class ObjectDetector:
         self.camera.try_calc_undistorted_camera_matrix()
 
         self.cap = cv2.VideoCapture(0)
-        self.cap.open(SettingsDecoder['ADDRESS'])  # registra i dati dalla webcam del telefono
+        if SettingsDecoder['ADDRESS'] is not '':
+            self.cap.open(SettingsDecoder['ADDRESS'])  # registra i dati dalla webcam del telefono
         self.__try_load_ratios()
         self.__create_parameters_window()
 
@@ -97,7 +98,9 @@ class ObjectDetector:
                 cv2.destroyWindow(constants.PARAMETERS_WINDOW_NAME)
                 cv2.destroyWindow(constants.SHAPE_DETECTION_WINDOW_NAME)
                 cv2.destroyWindow(constants.THRESHOLD_WINDOW_NAME)
-                return True
+                if self.countdown_state is True:
+                    return True
+                return False
             elif cv2.getWindowProperty(constants.SHAPE_DETECTION_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
                 cv2.destroyWindow(constants.PARAMETERS_WINDOW_NAME)
                 cv2.destroyWindow(constants.THRESHOLD_WINDOW_NAME)
@@ -171,10 +174,17 @@ class ObjectDetector:
                 cy = int(m['m01'] / m['m00'])
                 if self.__contour_respect_trackbars_conditions(area, peri):
                     self.__try_update_shapes(cnt, area, peri, cx, cy)
-                    cv2.drawContours(img_contour, cnt, -1, (255, 0, 255), 7)
+                    cv2.drawContours(img_contour, cnt, -1, (255, 0, 255), 2)
                     approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
                     x, y, w, h = cv2.boundingRect(approx)
-                    cv2.rectangle(img_contour, (x, y), (x + w, y + h), (0, 255, 0), 5)
+                    padding = SettingsDecoder['PADDING_PIXELS']
+                    cv2.rectangle(
+                        img_contour,
+                        (x - padding, y - padding),
+                        (x + w + padding, y + h + padding),
+                        (0, 255, 0),
+                        3
+                    )
 
                     cv2.putText(
                         img_contour,

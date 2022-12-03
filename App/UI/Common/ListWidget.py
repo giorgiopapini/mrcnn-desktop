@@ -55,7 +55,7 @@ class ListWidget:
         if arr is None or len(arr) is 0:
             empty_list = Label(
                 self.frame,
-                text="Nothing to see here yet",
+                text="Nessun elemento presente nella lista",
                 bg="white"
             )
             empty_list.pack()

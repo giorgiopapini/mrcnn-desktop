@@ -43,7 +43,7 @@ class ImageTile(Frame):
         self.shape_label = Label(
             self,
             text=f"{self.img_name}",
-            font=("Lucida Console", 9),
+            font=("Lucida Console", 10),
             bg="white",
             cursor="hand2"
         )

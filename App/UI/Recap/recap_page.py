@@ -1,5 +1,7 @@
 from tkinter import *
 
+import cv2
+
 from App.UI.Common.ListElement import ListElement
 from App.UI.Common.ListWidget import ListWidget
 from App.UI.Recap.ImageTile.image_tile import ImageTile
@@ -54,7 +56,7 @@ class RecapPage(Page):
             image=self.save_recap_img,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=self.save_cropped_images,
             relief="flat",
             cursor="hand2"
         )
@@ -101,6 +103,7 @@ class RecapPage(Page):
         except ValueError:
             pass
 
-    def btn_clicked(self):
-        print('clicked')
+    def save_cropped_images(self):
+        for i in range(len(self.cropped_images)):
+            cv2.imwrite(f"img{i}.png", self.cropped_images[i][0])
         # save images in a PDF file
