@@ -12,6 +12,8 @@ class DataTypes(Enum):
     CHAR = Char
     INT = Integer
 
+def empty(a):
+    pass
 
 # ========== CALIBRATION ==========
 SAVING_TIME = 1

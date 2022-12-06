@@ -45,14 +45,15 @@ class Calibrator:
 
     def capture_images(self):
         cap = cv2.VideoCapture(0)
-        #cap.open(constants.ADDRESS)  # registra i dati dalla webcam del telefono
+        if SettingsDecoder['ADDRESS'] is not '':
+            cap.open(SettingsDecoder['ADDRESS'])  # registra i dati dalla webcam del telefono
 
         index = 0
         while True:
             success, real_img = cap.read()
 
             img = real_img.copy()
-            img = cv2.resize(img, None, None, fx=0.5, fy=0.5)
+            img = cv2.resize(img, (960, 540))
 
             self.__manage_image_saving()
             self.__try_show_commands(img=img)

@@ -20,7 +20,8 @@ class ArucoDetector:
         self.camera.try_calc_undistorted_camera_matrix()
 
         self.cap = cv2.VideoCapture(0)
-        self.cap.open(SettingsDecoder['ADDRESS'])  # registra i dati dalla webcam del telefono
+        if SettingsDecoder['ADDRESS'] is not '':
+            self.cap.open(SettingsDecoder['ADDRESS'])  # registra i dati dalla webcam del telefono
 
     def start(self):
         while True:
@@ -32,7 +33,7 @@ class ArucoDetector:
                 None,
                 self.camera.undistorted_camera_matrix
             )
-            undistorted_img = cv2.resize(undistorted_img, None, None, fx=0.5, fy=0.5)
+            undistorted_img = cv2.resize(undistorted_img, (960, 540))
 
             self.__try_locate_aruco_marker(img=undistorted_img)
             self.__try_show_commands(img=undistorted_img)

@@ -1,10 +1,8 @@
 from tkinter import *
 from App.ArucoDetection.aruco_detection import ArucoDetector
 from App.CameraCalibration.calibration import Calibrator
-from App.ShapeDetection.cropper import Cropper
-from App.ShapeDetection.shape_detection import ObjectDetector
 from App.UI.Common.SettingsDecoder import SettingsDecoder
-from App.UI.Recap.recap_page import RecapPage
+from App.UI.ScanSelection.scan_selection_page import ScanSelectionPage
 from App.UI.Settings.settings_page import SettingsPage
 from App.UI.page import Page
 
@@ -56,7 +54,10 @@ class HomePage(Page):
             image=self.button_img,
             borderwidth=0,
             highlightthickness=0,
-            command=self.start_obj_detection if self.available else None,
+            command=lambda: self.to_page(
+                page=ScanSelectionPage,
+                previous_page=HomePage
+            ),
             relief="flat",
             cursor="hand2"
         )
@@ -100,28 +101,6 @@ class HomePage(Page):
             height=31
         )
 
-    def start_obj_detection(self):
-        self.__set_button_state(False)
-        object_detector = ObjectDetector()
-        status = object_detector.start()
-
-        if status is True:
-            for shape in object_detector.shapes:
-                print(f"area: {shape.average_area / object_detector.pixel_cm_squared_ratio}")
-                print(f"perimeter: {shape.average_perim / object_detector.pixel_cm_ratio}")
-                print("================")
-
-            cropped_images = self.crop_shapes(object_detector.undistorted_img, object_detector.shapes)
-            self.to_page(
-                page=RecapPage,
-                previous_page=HomePage,
-                cropped_images=cropped_images
-            )
-
-    def crop_shapes(self, original_img, shapes):
-        cropper = Cropper(original_img, shapes)
-        return cropper.get_cropped_shapes()
-
     def start_aruco_marker_detection(self):
         aruco_detector = ArucoDetector()
         aruco_detector.start()
@@ -132,6 +111,3 @@ class HomePage(Page):
         cal = Calibrator(rows_num=rows, cols_num=cols)
         cal.capture_images()
         #cal.calibrate()
-
-    def __set_button_state(self, state):
-        self.available = state

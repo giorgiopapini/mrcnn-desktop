@@ -1,36 +1,34 @@
+import abc
 import json
 import time
 import cv2
 
 import constants
 from App.Camera.camera_object import Camera
+from App.ShapeDetection.object_detector_interface import ObjectDetectorInterface
 from App.ShapeDetection.shape import Shape
 from App.UI.Common.SettingsDecoder import SettingsDecoder
 
 
-def empty(a):
-    pass
-
-
-class ObjectDetector:
-    undistorted_img = None
-
-    countdown_state = False
-    current_time = None
-    img_contour = None
-
-    pixel_cm_squared_ratio = 0
-    pixel_cm_ratio = 0
-
-    total_area_pixel = 0
-    total_perimeter_pixel = 0
-
-    shapes = []
-
+class BasicShapeDetector(ObjectDetectorInterface):
     def __init__(self):
         self.SCAN_CHAR = SettingsDecoder['SCAN_CHAR']
         self.QUIT_CHAR = SettingsDecoder['QUIT_CHAR']
         self.countdown_value = SettingsDecoder['SCAN_TIME']
+
+        self.undistorted_img = None
+
+        self.countdown_state = False
+        self.current_time = None
+        self.img_contour = None
+
+        self.pixel_cm_squared_ratio = 0
+        self.pixel_cm_ratio = 0
+
+        self.total_area_pixel = 0
+        self.total_perimeter_pixel = 0
+
+        self.shapes = []
 
         self.current_time = time.time()
 
@@ -59,12 +57,15 @@ class ObjectDetector:
     def __create_parameters_window(self):
         cv2.namedWindow(constants.PARAMETERS_WINDOW_NAME)
         cv2.resizeWindow(constants.PARAMETERS_WINDOW_NAME, 700, 315)
-        cv2.createTrackbar("Threshold1", constants.PARAMETERS_WINDOW_NAME, 46, 255, empty)
-        cv2.createTrackbar("Threshold2", constants.PARAMETERS_WINDOW_NAME, 46, 255, empty)
-        cv2.createTrackbar("Area Min", constants.PARAMETERS_WINDOW_NAME, 5000, 30000, empty)
-        cv2.createTrackbar("Area Max", constants.PARAMETERS_WINDOW_NAME, 300000, 30000, empty)
-        cv2.createTrackbar("Perim Min", constants.PARAMETERS_WINDOW_NAME, 0, 10000, empty)
-        cv2.createTrackbar("Perim Max", constants.PARAMETERS_WINDOW_NAME, 10000, 10000, empty)
+        self.set_trackbars()
+        cv2.createTrackbar("Area Min", constants.PARAMETERS_WINDOW_NAME, 5000, 30000, constants.empty)
+        cv2.createTrackbar("Area Max", constants.PARAMETERS_WINDOW_NAME, 300000, 30000, constants.empty)
+        cv2.createTrackbar("Perim Min", constants.PARAMETERS_WINDOW_NAME, 0, 10000, constants.empty)
+        cv2.createTrackbar("Perim Max", constants.PARAMETERS_WINDOW_NAME, 10000, 10000, constants.empty)
+
+    def set_trackbars(self):
+        cv2.createTrackbar("Threshold1", constants.PARAMETERS_WINDOW_NAME, 46, 255, constants.empty)
+        cv2.createTrackbar("Threshold2", constants.PARAMETERS_WINDOW_NAME, 46, 255, constants.empty)
 
     def start(self):
         while True:
@@ -76,21 +77,18 @@ class ObjectDetector:
                 None,
                 self.camera.undistorted_camera_matrix
             )
-            self.undistorted_img = cv2.resize(self.undistorted_img, None, None, fx=0.5, fy=0.5)
+            self.undistorted_img = cv2.resize(self.undistorted_img, (960, 540))
 
-            img_blur = cv2.GaussianBlur(self.undistorted_img, (7, 7), 1)
-            img_gray = cv2.cvtColor(img_blur, cv2.COLOR_BGR2GRAY)
+            img_gray = cv2.cvtColor(self.undistorted_img, cv2.COLOR_BGR2GRAY)
+            img_blur = cv2.GaussianBlur(img_gray, (7, 7), 0)
 
-            threshold1 = cv2.getTrackbarPos("Threshold1", constants.PARAMETERS_WINDOW_NAME)
-            threshold2 = cv2.getTrackbarPos("Threshold2", constants.PARAMETERS_WINDOW_NAME)
-
-            img_thresh = cv2.threshold(img_gray, threshold1, threshold2, cv2.THRESH_BINARY_INV)[1]
-            cv2.imshow(constants.THRESHOLD_WINDOW_NAME, img_thresh)
+            prepared_img = self.refine_image(img_blur)
+            cv2.imshow(constants.THRESHOLD_WINDOW_NAME, prepared_img)
 
             self.img_contour = self.undistorted_img.copy()
             self.__try_show_commmands(img=self.img_contour)
             self.__try_manage_countdown(img=self.img_contour)
-            self.get_contours(img_thresh, self.img_contour)
+            self.get_contours(prepared_img, self.img_contour)
 
             cv2.imshow(constants.SHAPE_DETECTION_WINDOW_NAME, self.img_contour)  # renderizza l'immagine
 
@@ -113,6 +111,12 @@ class ObjectDetector:
                 cv2.destroyWindow(constants.SHAPE_DETECTION_WINDOW_NAME)
                 cv2.destroyWindow(constants.THRESHOLD_WINDOW_NAME)
                 return False
+
+    def refine_image(self, img_blur):
+        threshold1 = cv2.getTrackbarPos("Threshold1", constants.PARAMETERS_WINDOW_NAME)
+        threshold2 = cv2.getTrackbarPos("Threshold2", constants.PARAMETERS_WINDOW_NAME)
+        img_canny = cv2.Canny(img_blur, threshold1, threshold2)
+        return img_canny
 
     def __try_show_commmands(self, img):
         if not self.countdown_state:
