@@ -1,4 +1,21 @@
-class String:
+import abc
+
+
+class DataType:
+    __metaclass__ = abc.ABCMeta
+
+    @staticmethod
+    @abc.abstractmethod
+    def is_valid(input_data):
+        pass
+
+    @staticmethod
+    @abc.abstractmethod
+    def get_converted_data(input_data):
+        pass
+
+
+class String(DataType):
     @staticmethod
     def is_valid(input_data):
         # Filtrare l'input se non é un carattere alfanumerico (tipo Alt, Ctrl, ecc... non devono ritornare True)
@@ -9,7 +26,7 @@ class String:
         return str(input_data)
 
 
-class Char:
+class Char(DataType):
     @staticmethod
     def is_valid(input_data):
         if len(input_data) > 1:
@@ -21,7 +38,7 @@ class Char:
         return str(input_data)
 
 
-class Integer:
+class Integer(DataType):
     @staticmethod
     def is_valid(input_data):
         try:
