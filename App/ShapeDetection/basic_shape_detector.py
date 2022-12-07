@@ -18,7 +18,7 @@ class BasicShapeDetector(ObjectDetectorInterface):
         self.QUIT_CHAR = SettingsDecoder['QUIT_CHAR']
         self.countdown_value = SettingsDecoder['SCAN_TIME']
 
-        self.undistorted_img = None
+        self.img = None
 
         self.countdown_state = False
         self.current_time = None
@@ -68,23 +68,21 @@ class BasicShapeDetector(ObjectDetectorInterface):
 
     def start(self):
         while True:
-            img = self.input_type.read(self.cap)
-            self.undistorted_img = cv2.undistort(
-                img,
+            self.img = self.input_type.read(
+                self.cap,
                 self.camera.camera_matrix,
                 self.camera.distortion_data,
-                None,
                 self.camera.undistorted_camera_matrix
             )
-            self.undistorted_img = cv2.resize(self.undistorted_img, (960, 540))
+            self.img = cv2.resize(self.img, (constants.FRAME_WIDTH, constants.FRAME_HEIGHT))
 
-            img_gray = cv2.cvtColor(self.undistorted_img, cv2.COLOR_BGR2GRAY)
+            img_gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
             img_blur = cv2.GaussianBlur(img_gray, (7, 7), 0)
 
             prepared_img = self.refine_image(img_blur)
             cv2.imshow(constants.THRESHOLD_WINDOW_NAME, prepared_img)
 
-            self.img_contour = self.undistorted_img.copy()
+            self.img_contour = self.img.copy()
             self.__try_show_commmands(img=self.img_contour)
             self.__try_manage_countdown(img=self.img_contour)
             self.get_contours(prepared_img, self.img_contour)

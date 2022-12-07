@@ -1,6 +1,8 @@
 import cv2
 import abc
 
+import constants
+
 
 class InputTypeInterface:
     __metaclass__ = abc.ABCMeta
@@ -12,7 +14,7 @@ class InputTypeInterface:
 
     @staticmethod
     @abc.abstractmethod
-    def read(data):
+    def read(data, camera_matrix, distortion_data, undistorted_camera_matrix):
         pass
 
 
@@ -25,8 +27,15 @@ class Video(InputTypeInterface):
         return cap
 
     @staticmethod
-    def read(camera):
+    def read(camera, camera_matrix, distortion_data, undistorted_camera_matrix):
         success, img = camera.read()
+        img = cv2.undistort(
+            img,
+            camera_matrix,
+            distortion_data,
+            None,
+            undistorted_camera_matrix
+        )
         return img
 
 
@@ -37,5 +46,5 @@ class Image(InputTypeInterface):
         return img
 
     @staticmethod
-    def read(img):
+    def read(img, camera_matrix, distortion_data, undistorted_camera_matrix):
         return img

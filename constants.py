@@ -5,7 +5,8 @@ from App.UI.Common.DetectionInputTypes import Video, Image
 
 BACKSPACE_KEYSYM_NUM = 65288
 SETTINGS_FILE_NAME = "settings.json"
-
+FRAME_HEIGHT = 540
+FRAME_WIDTH = 960
 
 # ========== DATA TYPES ENUM FOR FORMFIELD CLASS ==========
 class DataTypes(Enum):

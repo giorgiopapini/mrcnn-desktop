@@ -40,7 +40,8 @@ class RecapPage(Page):
             borderwidth=0,
             highlightthickness=0,
             command=lambda: self.to_page(
-                page=self.previous_page
+                page=self.previous_page,
+                homepage=self.homepage
             ),
             relief="flat",
             cursor="hand2"

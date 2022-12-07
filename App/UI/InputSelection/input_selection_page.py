@@ -121,10 +121,11 @@ class InputSelectionPage(Page):
                 print(f"perimeter: {shape.average_perim / object_detector.pixel_cm_ratio}")
                 print("================")
 
-            cropped_images = self.crop_shapes(object_detector.undistorted_img, object_detector.shapes)
+            cropped_images = self.crop_shapes(object_detector.img, object_detector.shapes)
             self.to_page(
                 page=RecapPage,
                 previous_page=self.previous_page,
+                homepage=self.homepage,
                 cropped_images=cropped_images
             )
 
