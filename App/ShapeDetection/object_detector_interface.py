@@ -1,9 +1,7 @@
 import abc
 
 
-class ObjectDetectorInterface:
-    __metaclass__ = abc.ABCMeta
-
+class ObjectDetectorInterface(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def start(self):
         pass

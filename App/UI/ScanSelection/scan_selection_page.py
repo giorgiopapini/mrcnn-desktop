@@ -2,8 +2,7 @@ from tkinter import *
 
 from App.ShapeDetection.adaptive_threshold_shape_detector import AdaptiveThresholdShapeDetector
 from App.ShapeDetection.basic_shape_detector import BasicShapeDetector
-from App.ShapeDetection.cropper import Cropper
-from App.UI.Recap.recap_page import RecapPage
+from App.UI.InputSelection.input_selection_page import InputSelectionPage
 from App.UI.page import Page
 
 
@@ -39,7 +38,7 @@ class ScanSelectionPage(Page):
             borderwidth=0,
             highlightthickness=0,
             command=lambda: self.to_page(
-                page=self.previous_page
+                page=self.homepage
             ),
             relief="flat",
             cursor="hand2"
@@ -70,8 +69,11 @@ class ScanSelectionPage(Page):
             image=self.scan_btn_img,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: self.start_scanning(
-                detector_class=BasicShapeDetector
+            command=lambda: self.to_page(
+                page=InputSelectionPage,
+                homepage=self.homepage,
+                previous_page=ScanSelectionPage,
+                detector_class=BasicShapeDetector,
             ),
             relief="flat",
             cursor="hand2"
@@ -87,8 +89,11 @@ class ScanSelectionPage(Page):
             image=self.scan_btn_img,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: self.start_scanning(
-                detector_class=AdaptiveThresholdShapeDetector
+            command=lambda: self.to_page(
+                page=InputSelectionPage,
+                homepage=self.homepage,
+                previous_page=ScanSelectionPage,
+                detector_class=AdaptiveThresholdShapeDetector,
             ),
             relief="flat",
             cursor="hand2"
@@ -114,32 +119,6 @@ class ScanSelectionPage(Page):
             width=30,
             height=31
         )
-
-    def btn_clicked(self):
-        pass
-
-    def start_scanning(self, detector_class):
-        object_detector = detector_class()
-        status = object_detector.start()
-        self.get_results_and_go_to_recap_page(object_detector, status)
-
-    def get_results_and_go_to_recap_page(self, object_detector, status):
-        if status is True:
-            for shape in object_detector.shapes:
-                print(f"area: {shape.average_area / object_detector.pixel_cm_squared_ratio}")
-                print(f"perimeter: {shape.average_perim / object_detector.pixel_cm_ratio}")
-                print("================")
-
-            cropped_images = self.crop_shapes(object_detector.undistorted_img, object_detector.shapes)
-            self.to_page(
-                page=RecapPage,
-                previous_page=self.previous_page,
-                cropped_images=cropped_images
-            )
-
-    def crop_shapes(self, original_img, shapes):
-        cropper = Cropper(original_img, shapes)
-        return cropper.get_cropped_shapes()
 
     def btn_clicked(self):
         pass

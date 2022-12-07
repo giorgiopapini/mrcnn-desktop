@@ -1,4 +1,5 @@
 from tkinter import *
+
 from App.ArucoDetection.aruco_detection import ArucoDetector
 from App.CameraCalibration.calibration import Calibrator
 from App.UI.Common.SettingsDecoder import SettingsDecoder
@@ -56,6 +57,7 @@ class HomePage(Page):
             highlightthickness=0,
             command=lambda: self.to_page(
                 page=ScanSelectionPage,
+                homepage=HomePage,
                 previous_page=HomePage
             ),
             relief="flat",

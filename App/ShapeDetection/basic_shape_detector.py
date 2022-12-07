@@ -1,4 +1,3 @@
-import abc
 import json
 import time
 import cv2
@@ -11,7 +10,10 @@ from App.UI.Common.SettingsDecoder import SettingsDecoder
 
 
 class BasicShapeDetector(ObjectDetectorInterface):
-    def __init__(self):
+    def __init__(self, input_type=constants.DetectionInputType.VIDEO, img_path=""):
+        self.input_type = input_type.value
+        self.cap = self.input_type.initialize_capture(img_path, SettingsDecoder['ADDRESS'])
+
         self.SCAN_CHAR = SettingsDecoder['SCAN_CHAR']
         self.QUIT_CHAR = SettingsDecoder['QUIT_CHAR']
         self.countdown_value = SettingsDecoder['SCAN_TIME']
@@ -35,9 +37,6 @@ class BasicShapeDetector(ObjectDetectorInterface):
         self.camera = Camera()
         self.camera.try_calc_undistorted_camera_matrix()
 
-        self.cap = cv2.VideoCapture(0)
-        if SettingsDecoder['ADDRESS'] is not '':
-            self.cap.open(SettingsDecoder['ADDRESS'])  # registra i dati dalla webcam del telefono
         self.__try_load_ratios()
         self.__create_parameters_window()
 
@@ -69,7 +68,7 @@ class BasicShapeDetector(ObjectDetectorInterface):
 
     def start(self):
         while True:
-            success, img = self.cap.read()
+            img = self.input_type.read(self.cap)
             self.undistorted_img = cv2.undistort(
                 img,
                 self.camera.camera_matrix,

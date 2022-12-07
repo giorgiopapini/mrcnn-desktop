@@ -1,6 +1,7 @@
 from enum import Enum
 
 from App.UI.Common.DataTypes import String, Char, Integer
+from App.UI.Common.DetectionInputTypes import Video, Image
 
 BACKSPACE_KEYSYM_NUM = 65288
 SETTINGS_FILE_NAME = "settings.json"
@@ -12,8 +13,15 @@ class DataTypes(Enum):
     CHAR = Char
     INT = Integer
 
+
+class DetectionInputType(Enum):
+    VIDEO = Video
+    IMAGE = Image
+
+
 def empty(a):
     pass
+
 
 # ========== CALIBRATION ==========
 SAVING_TIME = 1

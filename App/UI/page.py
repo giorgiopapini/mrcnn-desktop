@@ -6,6 +6,7 @@ class Page(Frame):
         Frame.__init__(self, root)
         self.root = root
         self.previous_page = kwargs.get("previous_page", None)
+        self.homepage = kwargs.get("homepage", None)
 
     def to_page(self, page=None, **kwargs):
         if page is not None:

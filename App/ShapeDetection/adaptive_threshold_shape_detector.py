@@ -6,8 +6,8 @@ from App.ShapeDetection.object_detector_interface import ObjectDetectorInterface
 
 
 class AdaptiveThresholdShapeDetector(BasicShapeDetector, ObjectDetectorInterface):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, input_type, img_path):
+        super().__init__(input_type, img_path)
 
     def set_trackbars(self):
         cv2.createTrackbar("Regioni", constants.PARAMETERS_WINDOW_NAME, 3, 255, constants.empty)
