@@ -1,8 +1,6 @@
 import cv2
 import abc
 
-import constants
-
 
 class InputTypeInterface:
     __metaclass__ = abc.ABCMeta

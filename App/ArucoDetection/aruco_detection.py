@@ -45,7 +45,7 @@ class ArucoDetector:
                     self.__save_ratios_in_json()
                     break
             elif key_pressed == self.QUIT_CHAR:
-                cv2.destroyWindow(constants.ARUCO_DETECTION_WINDOW_NAME)
+                cv2.destroyAllWindows()
                 break
             elif cv2.getWindowProperty(constants.ARUCO_DETECTION_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
                 break

@@ -97,16 +97,13 @@ class BasicShapeDetector(ObjectDetectorInterface):
                     return True
                 return False
             elif cv2.getWindowProperty(constants.SHAPE_DETECTION_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
-                cv2.destroyWindow(constants.PARAMETERS_WINDOW_NAME)
-                cv2.destroyWindow(constants.THRESHOLD_WINDOW_NAME)
+                cv2.destroyAllWindows()
                 return False
             elif cv2.getWindowProperty(constants.THRESHOLD_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
-                cv2.destroyWindow(constants.PARAMETERS_WINDOW_NAME)
-                cv2.destroyWindow(constants.SHAPE_DETECTION_WINDOW_NAME)
+                cv2.destroyAllWindows()
                 return False
             elif cv2.getWindowProperty(constants.PARAMETERS_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
-                cv2.destroyWindow(constants.SHAPE_DETECTION_WINDOW_NAME)
-                cv2.destroyWindow(constants.THRESHOLD_WINDOW_NAME)
+                cv2.destroyAllWindows()
                 return False
 
     def refine_image(self, img_blur):

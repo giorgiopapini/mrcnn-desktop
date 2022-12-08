@@ -63,7 +63,7 @@ class Calibrator:
 
             keys = cv2.waitKey(1) & 0xFF
             if keys == ord(self.QUIT_CHAR) or keys == ord(self.QUIT_CHAR.upper()):
-                cv2.destroyWindow(constants.CALIBRATION_WINDOW_NAME)
+                cv2.destroyAllWindows()
                 break
             if keys == ord(self.SAVE_IMG_CHAR) or keys == ord(self.SAVE_IMG_CHAR.upper()):
                 if not self.image_saving_state:
@@ -71,7 +71,7 @@ class Calibrator:
                         self.__save_image(img=real_img, index=index)
                         index += 1
                     else:
-                        cv2.destroyWindow(constants.CALIBRATION_WINDOW_NAME)
+                        cv2.destroyAllWindows()
                         break
             elif cv2.getWindowProperty(constants.CALIBRATION_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
                 break
