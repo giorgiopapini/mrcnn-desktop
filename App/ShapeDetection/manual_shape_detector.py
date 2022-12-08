@@ -19,6 +19,7 @@ class ManualShapeDetector:
         self.ERASE_CHAR = SettingsDecoder['ERASE_CHAR']
         self.QUIT_CHAR = SettingsDecoder['QUIT_CHAR']
 
+        self.original_img = None
         self.img = None
         self.contours = [[]]
         self.current_contour = 0
@@ -53,17 +54,18 @@ class ManualShapeDetector:
 
     def __capture_img(self):
         if self.input_type == constants.DetectionInputType.IMAGE.value:
-            self.img = self.cap.copy()
+            self.original_img = self.cap.copy()
         else:
             picture_taker = PictureTaker()
-            self.img = picture_taker.take_picture()
+            self.original_img = picture_taker.take_picture()
 
     def start(self):
-        if self.img is None:
+        if self.original_img is None:
             cv2.destroyAllWindows()
             return False
         else:
             while True:
+                self.img = self.original_img.copy()
                 self.__write_commands()
                 self.__draw_lines(is_closed=False)
                 self.__draw_points()
