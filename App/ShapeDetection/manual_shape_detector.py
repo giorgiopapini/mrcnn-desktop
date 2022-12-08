@@ -69,8 +69,8 @@ class ManualShapeDetector:
                 self.__write_commands()
                 self.__draw_lines(is_closed=False)
                 self.__draw_points()
-                cv2.imshow('image', self.img)
-                cv2.setMouseCallback('image', self.click_event)
+                cv2.imshow(constants.SHAPE_DETECTION_WINDOW_NAME, self.img)
+                cv2.setMouseCallback(constants.SHAPE_DETECTION_WINDOW_NAME, self.click_event)
 
                 key = self.get_pressed_key()
                 if key == self.ERASE_CHAR:
@@ -84,7 +84,7 @@ class ManualShapeDetector:
                 elif key == self.QUIT_CHAR:
                     cv2.destroyAllWindows()
                     break
-                elif cv2.getWindowProperty('image', cv2.WND_PROP_VISIBLE) < 1:
+                elif cv2.getWindowProperty(constants.SHAPE_DETECTION_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
                     break
 
     def __write_commands(self):
