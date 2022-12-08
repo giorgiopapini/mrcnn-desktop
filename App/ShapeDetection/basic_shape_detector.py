@@ -90,9 +90,7 @@ class BasicShapeDetector(ObjectDetectorInterface):
             cv2.imshow(constants.SHAPE_DETECTION_WINDOW_NAME, self.img_contour)  # renderizza l'immagine
 
             if self.get_pressed_key() == self.QUIT_CHAR:
-                cv2.destroyWindow(constants.PARAMETERS_WINDOW_NAME)
-                cv2.destroyWindow(constants.SHAPE_DETECTION_WINDOW_NAME)
-                cv2.destroyWindow(constants.THRESHOLD_WINDOW_NAME)
+                cv2.destroyAllWindows()
                 if self.countdown_state is True:
                     return True
                 return False

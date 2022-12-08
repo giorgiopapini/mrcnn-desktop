@@ -7,6 +7,7 @@ import numpy as np
 import constants
 from App.Camera.PictureTaker import PictureTaker
 from App.Camera.camera_object import Camera
+from App.ShapeDetection.shape import Shape
 from App.UI.Common.SettingsDecoder import SettingsDecoder
 
 
@@ -19,8 +20,8 @@ class ManualShapeDetector:
         self.ERASE_CHAR = SettingsDecoder['ERASE_CHAR']
         self.QUIT_CHAR = SettingsDecoder['QUIT_CHAR']
 
-        self.original_img = None
         self.img = None
+        self.img_contour = None
         self.contours = [[]]
         self.current_contour = 0
         self.current_point = None
@@ -54,42 +55,40 @@ class ManualShapeDetector:
 
     def __capture_img(self):
         if self.input_type == constants.DetectionInputType.IMAGE.value:
-            self.original_img = self.cap.copy()
+            self.img = self.cap.copy()
         else:
             picture_taker = PictureTaker()
-            self.original_img = picture_taker.take_picture()
+            self.img = picture_taker.take_picture()
 
     def start(self):
-        if self.original_img is None:
+        if self.img is None:
             cv2.destroyAllWindows()
             return False
         else:
             while True:
-                self.img = self.original_img.copy()
+                self.img_contour = self.img.copy()
                 self.__write_commands()
                 self.__draw_lines(is_closed=False)
                 self.__draw_points()
-                cv2.imshow(constants.SHAPE_DETECTION_WINDOW_NAME, self.img)
+                cv2.imshow(constants.SHAPE_DETECTION_WINDOW_NAME, self.img_contour)
                 cv2.setMouseCallback(constants.SHAPE_DETECTION_WINDOW_NAME, self.click_event)
 
                 key = self.get_pressed_key()
                 if key == self.ERASE_CHAR:
                     self.__try_delete_last_line()
                 elif key == self.SCAN_CHAR:
-                    print(self.contours)
-                    arr = np.array(self.contours[0])
-                    area = cv2.contourArea(arr)
-                    perimeter = cv2.arcLength(arr, True)
-                    print(f"area: {area} ----- perim: {perimeter}")
+                    cv2.destroyAllWindows()
+                    self.__create_shapes()
+                    return True
                 elif key == self.QUIT_CHAR:
                     cv2.destroyAllWindows()
-                    break
+                    return False
                 elif cv2.getWindowProperty(constants.SHAPE_DETECTION_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
-                    break
+                    return False
 
     def __write_commands(self):
         cv2.putText(
-            self.img,
+            self.img_contour,
             f"Premi '{self.SCAN_CHAR}' per salvare i dati",
             (20, 20),
             cv2.FONT_HERSHEY_DUPLEX,
@@ -99,7 +98,7 @@ class ManualShapeDetector:
         )
 
         cv2.putText(
-            self.img,
+            self.img_contour,
             f"Premi '{self.ERASE_CHAR}' per cancellare",
             (20, 45),
             cv2.FONT_HERSHEY_DUPLEX,
@@ -109,7 +108,7 @@ class ManualShapeDetector:
         )
 
         cv2.putText(
-            self.img,
+            self.img_contour,
             f"Premi '{self.QUIT_CHAR}' per uscire",
             (20, 70),
             cv2.FONT_HERSHEY_DUPLEX,
@@ -119,7 +118,7 @@ class ManualShapeDetector:
         )
 
         cv2.putText(
-            self.img,
+            self.img_contour,
             f"Usa il tasto sinistro del mouse per tracciare le linee",
             (20, 95),
             cv2.FONT_HERSHEY_DUPLEX,
@@ -129,7 +128,7 @@ class ManualShapeDetector:
         )
 
         cv2.putText(
-            self.img,
+            self.img_contour,
             f"Usa il tasto destro del mouse per terminare la stesura di un contorno",
             (20, 120),
             cv2.FONT_HERSHEY_DUPLEX,
@@ -144,15 +143,14 @@ class ManualShapeDetector:
             pts = pts.reshape((-1, 1, 2))
             color = (0, 255, 0)
             thickness = 3
-            self.img = cv2.polylines(self.img, [pts], is_closed, color, thickness)
+            self.img_contour = cv2.polylines(self.img_contour, [pts], is_closed, color, thickness)
 
     def __draw_points(self):
         for contour in self.contours:
             for point in contour:
                 x = point[0]
                 y = point[1]
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                cv2.putText(self.img, f"({x}, {y})", (x, y), font, .6, (255, 0, 0), 2)
+                cv2.circle(self.img_contour, (x, y), radius=0, color=(0, 25, 255), thickness=8)
 
     def __try_delete_last_line(self):
         try:
@@ -160,6 +158,21 @@ class ManualShapeDetector:
             self.current_point = self.contours[self.current_contour][len(self.contours[self.current_contour]) - 1]
         except IndexError:
             self.current_point = None
+
+    def __create_shapes(self):
+        for contour in self.contours:
+            if len(contour) > 0:
+                contour = np.array(contour)
+                area = cv2.contourArea(contour)
+                peri = cv2.arcLength(contour, True)
+                m = cv2.moments(contour)
+                if m['m00'] != 0:
+                    cx = int(m['m10'] / m['m00'])
+                    cy = int(m['m01'] / m['m00'])
+                    shape = Shape(cx, cy, contour)
+                    shape.average_area = area
+                    shape.average_perim = peri
+                    self.shapes.append(shape)
 
     def click_event(self, event, x, y, flags, params):
         if event == cv2.EVENT_LBUTTONDOWN:
