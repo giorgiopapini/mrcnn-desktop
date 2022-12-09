@@ -1,8 +1,8 @@
 from tkinter import *
 
-from App.ArucoDetection.aruco_detection import ArucoDetector
 from App.CameraCalibration.calibration import Calibrator
 from App.UI.Common.SettingsDecoder import SettingsDecoder
+from App.UI.PixelCmRelation.cm_per_pixel_page import CmPerPixelPage
 from App.UI.ScanSelection.scan_selection_page import ScanSelectionPage
 from App.UI.Settings.settings_page import SettingsPage
 from App.UI.page import Page
@@ -40,7 +40,11 @@ class HomePage(Page):
             image=self.button_img,
             borderwidth=0,
             highlightthickness=0,
-            command=self.start_aruco_marker_detection if self.available else print(self.available),
+            command=lambda: self.to_page(
+                page=CmPerPixelPage,
+                homepage=HomePage,
+                previous_page=HomePage
+            ),
             relief="flat",
             cursor="hand2"
         )
@@ -102,10 +106,6 @@ class HomePage(Page):
             width=118,
             height=31
         )
-
-    def start_aruco_marker_detection(self):
-        aruco_detector = ArucoDetector()
-        aruco_detector.start()
 
     def start_calibration(self):
         cols = SettingsDecoder['CHESSBOARD_COLS']

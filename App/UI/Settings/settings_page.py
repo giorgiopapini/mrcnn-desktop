@@ -221,7 +221,7 @@ class SettingsPage(Page):
 
         self.aruco_area_field = FormField(
             root=self.root,
-            input_type=constants.DataTypes.INT,
+            input_type=constants.DataTypes.FLOAT,
             setting='ARUCO_AREA_IN_CM',
             bd=0,
             bg="#ffffff",

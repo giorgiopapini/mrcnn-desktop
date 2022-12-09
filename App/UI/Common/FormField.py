@@ -10,7 +10,10 @@ class FormField(Entry):
         self.input_type = input_type.value
 
         self.setting = setting
-        self.initial_text = SettingsDecoder[self.setting]
+        if self.setting is not '':
+            self.initial_text = SettingsDecoder[self.setting]
+        else:
+            self.initial_text = ''
         self.insert(0, self.initial_text)
 
         self.bind("<KeyRelease>", self.__get_input)

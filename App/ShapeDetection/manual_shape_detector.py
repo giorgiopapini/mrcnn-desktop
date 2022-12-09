@@ -69,9 +69,10 @@ class ManualShapeDetector:
                 self.img_contour = self.img.copy()
                 self.__write_commands()
                 self.__draw_lines(is_closed=False)
+                self.__draw_point(self.current_point)
                 self.__draw_points()
                 cv2.imshow(constants.SHAPE_DETECTION_WINDOW_NAME, self.img_contour)
-                cv2.setMouseCallback(constants.SHAPE_DETECTION_WINDOW_NAME, self.click_event)
+                cv2.setMouseCallback(constants.SHAPE_DETECTION_WINDOW_NAME, self.mouse_events)
 
                 key = self.get_pressed_key()
                 if key == self.ERASE_CHAR:
@@ -148,9 +149,13 @@ class ManualShapeDetector:
     def __draw_points(self):
         for contour in self.contours:
             for point in contour:
-                x = point[0]
-                y = point[1]
-                cv2.circle(self.img_contour, (x, y), radius=0, color=(0, 25, 255), thickness=8)
+                self.__draw_point(point)
+
+    def __draw_point(self, point):
+        if point is not None:
+            x = point[0]
+            y = point[1]
+            cv2.circle(self.img_contour, (x, y), radius=0, color=(0, 25, 255), thickness=8)
 
     def __try_delete_last_line(self):
         try:
@@ -174,7 +179,7 @@ class ManualShapeDetector:
                     shape.average_perim = peri
                     self.shapes.append(shape)
 
-    def click_event(self, event, x, y, flags, params):
+    def mouse_events(self, event, x, y, flags, params):
         if event == cv2.EVENT_LBUTTONDOWN:
             self.__save_point((x, y))
         elif event == cv2.EVENT_RBUTTONDOWN:

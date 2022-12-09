@@ -53,3 +53,20 @@ class Integer(DataType):
             return int(input_data)
         except ValueError:
             return 1
+
+
+class Float(DataType):
+    @staticmethod
+    def is_valid(input_data):
+        try:
+            float(input_data)
+            return True
+        except ValueError:
+            return False
+
+    @staticmethod
+    def get_converted_data(input_data):
+        try:
+            return float(input_data)
+        except ValueError:
+            return 1
