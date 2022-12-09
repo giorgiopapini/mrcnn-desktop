@@ -1,3 +1,4 @@
+import json
 from tkinter import *
 from App.ArucoDetection.aruco_detection import ArucoDetector
 from App.UI.Common.FormField import FormField
@@ -70,7 +71,7 @@ class CmPerPixelPage(Page):
             image=self.scan_btn_img,
             borderwidth=0,
             highlightthickness=0,
-            command=self.update_cm_per_pixel_ratio,
+            command=self.__try_save_ratios,
             relief="flat",
             cursor="hand2"
         )
@@ -108,7 +109,7 @@ class CmPerPixelPage(Page):
 
         self.cm_form = FormField(
             root=self.root,
-            input_type=constants.DataTypes.INT,
+            input_type=constants.DataTypes.FLOAT,
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -121,11 +122,49 @@ class CmPerPixelPage(Page):
             height=19
         )
 
-    def update_cm_per_pixel_ratio(self):
+        self.cm_form.insert(0, 1)
+        self.__try_load_ratio()
+
+    def __try_load_ratio(self):
+        try:
+            self.__load_ratio()
+        except FileNotFoundError:
+            pass
+
+    def __load_ratio(self):
+        with open('App/Camera/ratios.json', 'r') as file:
+            json_object = json.load(file)
+            pixel_cm_ratio = json_object['pixel_cm_ratio']
+            self.pixel_form.insert(0, (pixel_cm_ratio * 1))
+
+    def __try_save_ratios(self):
+        try:
+            self.__save_ratios_in_json()
+            self.to_page(
+                page=self.homepage,
+                homepage=self.homepage,
+            )
+        except (ValueError, ZeroDivisionError):
+            pass
+
+    def __save_ratios_in_json(self):
+        pixel_cm_ratio, pixel_cm_squared_ratio = self.get_ratios()
+        with open("App/Camera/ratios.json", 'w') as file:
+            json_data = json.dumps(
+                {
+                    "pixel_cm_squared_ratio": pixel_cm_squared_ratio,
+                    "pixel_cm_ratio": pixel_cm_ratio
+                },
+                indent=4
+            )
+            file.write(json_data)
+
+    def get_ratios(self):
         pixel = int(self.pixel_form.get())
         cm = float(self.cm_form.get())
-        print(cm)
-        print(pixel)
+        pixel_cm_ratio = pixel / cm
+        pixel_cm_squared_ratio = pow(pixel_cm_ratio, 2)
+        return pixel_cm_ratio, pixel_cm_squared_ratio
 
     def start_aruco_marker_detection(self):
         aruco_detector = ArucoDetector()
