@@ -1,4 +1,6 @@
 import json
+from math import sqrt
+
 import cv2
 from tkinter import *
 
@@ -18,6 +20,8 @@ class ManualShapeDetector:
 
         self.SCAN_CHAR = SettingsDecoder['SCAN_CHAR']
         self.ERASE_CHAR = SettingsDecoder['ERASE_CHAR']
+        self.SHOW_SEGMENT_LENGTH_CHAR = 'm'
+        self.show_segment_lengths = False
         self.QUIT_CHAR = SettingsDecoder['QUIT_CHAR']
 
         self.img = None
@@ -71,6 +75,7 @@ class ManualShapeDetector:
                 self.__draw_lines(is_closed=False)
                 self.__draw_point(self.current_point)
                 self.__draw_points()
+                self.__try_draw_segments_lengths()
                 cv2.imshow(constants.SHAPE_DETECTION_WINDOW_NAME, self.img_contour)
                 cv2.setMouseCallback(constants.SHAPE_DETECTION_WINDOW_NAME, self.mouse_events)
 
@@ -81,6 +86,11 @@ class ManualShapeDetector:
                     cv2.destroyAllWindows()
                     self.__create_shapes()
                     return True
+                elif key == self.SHOW_SEGMENT_LENGTH_CHAR:
+                    if self.show_segment_lengths is True:
+                        self.show_segment_lengths = False
+                    else:
+                        self.show_segment_lengths = True
                 elif key == self.QUIT_CHAR:
                     cv2.destroyAllWindows()
                     return False
@@ -110,7 +120,9 @@ class ManualShapeDetector:
 
         cv2.putText(
             self.img_contour,
-            f"Premi '{self.QUIT_CHAR}' per uscire",
+            f"Premi '{self.SHOW_SEGMENT_LENGTH_CHAR}' per " +
+            ('nascondere' if self.show_segment_lengths else 'mostrare') +
+            " la lunghezza dei segmenti",
             (20, 70),
             cv2.FONT_HERSHEY_DUPLEX,
             .7,
@@ -120,7 +132,7 @@ class ManualShapeDetector:
 
         cv2.putText(
             self.img_contour,
-            f"Usa il tasto sinistro del mouse per tracciare le linee",
+            f"Premi '{self.QUIT_CHAR}' per uscire",
             (20, 95),
             cv2.FONT_HERSHEY_DUPLEX,
             .7,
@@ -130,8 +142,18 @@ class ManualShapeDetector:
 
         cv2.putText(
             self.img_contour,
-            f"Usa il tasto destro del mouse per terminare la stesura di un contorno",
+            f"Usa il tasto sinistro del mouse per tracciare le linee",
             (20, 120),
+            cv2.FONT_HERSHEY_DUPLEX,
+            .7,
+            (255, 0, 0),
+            2
+        )
+
+        cv2.putText(
+            self.img_contour,
+            f"Usa il tasto destro del mouse per terminare la stesura di un contorno",
+            (20, 145),
             cv2.FONT_HERSHEY_DUPLEX,
             .7,
             (255, 0, 0),
@@ -156,6 +178,32 @@ class ManualShapeDetector:
             x = point[0]
             y = point[1]
             cv2.circle(self.img_contour, (x, y), radius=0, color=(0, 25, 255), thickness=8)
+
+    def __try_draw_segments_lengths(self):
+        if self.show_segment_lengths is True:
+            for cnt in self.contours:
+                self.__try_draw_segments_in_contour(cnt)
+
+    def __try_draw_segments_in_contour(self, contour):
+        if len(contour) > 0:
+            for i in range(len(contour)):
+                if (i + 1) >= len(contour):
+                    break
+                else:
+                    first_point = contour[i]
+                    second_point = contour[i + 1]
+                    midpoint = (int((first_point[0] + second_point[0]) / 2), int((first_point[1] + second_point[1]) / 2))
+                    distance = sqrt(pow((second_point[0] - first_point[0]), 2) + pow((second_point[1] - first_point[1]), 2))
+                    if distance > 0:
+                        cv2.putText(
+                            self.img_contour,
+                            f"{distance}",
+                            midpoint,
+                            cv2.FONT_HERSHEY_DUPLEX,
+                            .7,
+                            (255, 0, 255),
+                            2
+                        )
 
     def __try_delete_last_line(self):
         try:
@@ -214,5 +262,7 @@ class ManualShapeDetector:
             return self.ERASE_CHAR
         elif keys == ord(self.SCAN_CHAR) or keys == ord(self.SCAN_CHAR.upper()):
             return self.SCAN_CHAR
+        elif keys == ord(self.SHOW_SEGMENT_LENGTH_CHAR) or keys == ord(self.SHOW_SEGMENT_LENGTH_CHAR.upper()):
+            return self.SHOW_SEGMENT_LENGTH_CHAR
         elif keys == ord(self.QUIT_CHAR) or keys == ord(self.QUIT_CHAR.upper()):
             return self.QUIT_CHAR

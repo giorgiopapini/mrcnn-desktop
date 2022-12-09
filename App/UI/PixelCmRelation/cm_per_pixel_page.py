@@ -89,7 +89,7 @@ class CmPerPixelPage(Page):
 
         self.pixel_form = FormField(
             root=self.root,
-            input_type=constants.DataTypes.INT,
+            input_type=constants.DataTypes.FLOAT,
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
@@ -145,6 +145,7 @@ class CmPerPixelPage(Page):
                 homepage=self.homepage,
             )
         except (ValueError, ZeroDivisionError):
+            print("failed")
             pass
 
     def __save_ratios_in_json(self):
@@ -160,7 +161,7 @@ class CmPerPixelPage(Page):
             file.write(json_data)
 
     def get_ratios(self):
-        pixel = int(self.pixel_form.get())
+        pixel = float(self.pixel_form.get())
         cm = float(self.cm_form.get())
         pixel_cm_ratio = pixel / cm
         pixel_cm_squared_ratio = pow(pixel_cm_ratio, 2)
