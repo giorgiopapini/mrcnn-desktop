@@ -20,7 +20,7 @@ class ManualShapeDetector:
 
         self.SCAN_CHAR = SettingsDecoder['SCAN_CHAR']
         self.ERASE_CHAR = SettingsDecoder['ERASE_CHAR']
-        self.SHOW_SEGMENT_LENGTH_CHAR = 'm'
+        self.SHOW_SEGMENT_LENGTH_CHAR = SettingsDecoder['SHOW_CHAR']
         self.show_segment_lengths = False
         self.QUIT_CHAR = SettingsDecoder['QUIT_CHAR']
 

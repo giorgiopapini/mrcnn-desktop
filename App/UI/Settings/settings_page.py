@@ -1,4 +1,3 @@
-import math
 from tkinter import *
 
 import constants
@@ -35,13 +34,27 @@ class SettingsPage(Page):
             width=800,
             bd=0,
             highlightthickness=0,
-            relief="ridge"
-        )
+            relief="ridge")
         self.canvas.place(x=0, y=0)
 
         self.background = self.canvas.create_image(
-            463.0, 161.0,
+            463.0, 179.0,
             image=self.background_img
+        )
+
+        self.save_btn = Button(
+            image=self.save_btn_img,
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.__try_save_new_env_variables,
+            relief="flat",
+            cursor="hand2"
+        )
+
+        self.save_btn.place(
+            x=351, y=51,
+            width=90,
+            height=39
         )
 
         self.calibration_info_btn = Button(
@@ -59,21 +72,6 @@ class SettingsPage(Page):
             height=20
         )
 
-        self.saving_info_btn = Button(
-            image=self.info_btn_img,
-            borderwidth=0,
-            highlightthickness=0,
-            command=self.btn_clicked,
-            relief="flat",
-            cursor="hand2"
-        )
-
-        self.saving_info_btn.place(
-            x=716, y=321,
-            width=20,
-            height=20
-        )
-
         self.scan_info_btn = Button(
             image=self.info_btn_img,
             borderwidth=0,
@@ -84,22 +82,7 @@ class SettingsPage(Page):
         )
 
         self.scan_info_btn.place(
-            x=508, y=321,
-            width=20,
-            height=20
-        )
-
-        self.aruco_info_btn = Button(
-            image=self.info_btn_img,
-            borderwidth=0,
-            highlightthickness=0,
-            command=self.btn_clicked,
-            relief="flat",
-            cursor="hand2"
-        )
-
-        self.aruco_info_btn.place(
-            x=210, y=321,
+            x=715, y=304,
             width=20,
             height=20
         )
@@ -136,19 +119,19 @@ class SettingsPage(Page):
             height=38
         )
 
-        self.save_btn = Button(
-            image=self.save_btn_img,
+        self.manual_scan_info_btn = Button(
+            image=self.info_btn_img,
             borderwidth=0,
             highlightthickness=0,
-            command=self.__try_save_new_env_variables,
+            command=self.btn_clicked,
             relief="flat",
             cursor="hand2"
         )
 
-        self.save_btn.place(
-            x=351, y=51,
-            width=90,
-            height=39
+        self.manual_scan_info_btn.place(
+            x=355, y=304,
+            width=20,
+            height=20
         )
 
         self.start_scan_char_field = self.canvas.create_image(
@@ -163,7 +146,7 @@ class SettingsPage(Page):
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
-            justify='center'
+            justify="center"
         )
 
         self.start_scan_char_field.place(
@@ -184,7 +167,7 @@ class SettingsPage(Page):
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
-            justify='center'
+            justify="center"
         )
 
         self.stop_camera_char_field.place(
@@ -205,7 +188,7 @@ class SettingsPage(Page):
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
-            justify='center'
+            justify="center"
         )
 
         self.camera_address_info.place(
@@ -214,29 +197,8 @@ class SettingsPage(Page):
             height=19
         )
 
-        self.aruco_area_field = self.canvas.create_image(
-            156.5, 383.5,
-            image=self.short_field_img
-        )
-
-        self.aruco_area_field = FormField(
-            root=self.root,
-            input_type=constants.DataTypes.FLOAT,
-            setting='ARUCO_AREA_IN_CM',
-            bd=0,
-            bg="#ffffff",
-            highlightthickness=0,
-            justify='center'
-        )
-
-        self.aruco_area_field.place(
-            x=131, y=375.4,
-            width=51,
-            height=19
-        )
-
         self.scan_duration_field = self.canvas.create_image(
-            441.5, 383.5,
+            596.5, 366.5,
             image=self.short_field_img
         )
 
@@ -247,17 +209,59 @@ class SettingsPage(Page):
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
-            justify='center'
+            justify="center"
         )
 
         self.scan_duration_field.place(
-            x=416, y=375.4,
+            x=571, y=358.4,
+            width=51,
+            height=19
+        )
+
+        self.show_segment_length_char_field = self.canvas.create_image(
+            308.5, 366.5,
+            image=self.short_field_img
+        )
+
+        self.show_segment_length_char_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.CHAR,
+            setting='SHOW_CHAR',
+            bd=0,
+            bg="#ffffff",
+            highlightthickness=0,
+            justify="center"
+        )
+
+        self.show_segment_length_char_field.place(
+            x=283, y=358.4,
+            width=51,
+            height=19
+        )
+
+        self.erase_segment_char_field = self.canvas.create_image(
+            308.5, 391.5,
+            image=self.short_field_img
+        )
+
+        self.erase_segment_char_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.CHAR,
+            setting='ERASE_CHAR',
+            bd=0,
+            bg="#ffffff",
+            highlightthickness=0,
+            justify="center"
+        )
+
+        self.erase_segment_char_field.place(
+            x=283, y=383.4,
             width=51,
             height=19
         )
 
         self.padding_field = self.canvas.create_image(
-            672.5, 383.5,
+            526.5, 418.5,
             image=self.extra_short_field_img
         )
 
@@ -268,19 +272,18 @@ class SettingsPage(Page):
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
-            justify='center'
+            justify="center"
         )
 
         self.padding_field.place(
-            x=658, y=375.4,
+            x=512, y=410.4,
             width=29,
             height=19
         )
 
         self.center_boundary_field = self.canvas.create_image(
-            455.5, 408.5,
-            image=self.short_field_img
-        )
+            610.5, 391.5,
+            image=self.short_field_img)
 
         self.center_boundary_field = FormField(
             root=self.root,
@@ -289,11 +292,11 @@ class SettingsPage(Page):
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
-            justify='center'
+            justify="center"
         )
 
         self.center_boundary_field.place(
-            x=430, y=400.4,
+            x=585, y=383.4,
             width=51,
             height=19
         )
@@ -310,7 +313,7 @@ class SettingsPage(Page):
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
-            justify='center'
+            justify="center"
         )
 
         self.chessboard_cols_field.place(
@@ -331,7 +334,7 @@ class SettingsPage(Page):
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
-            justify='center'
+            justify="center"
         )
 
         self.chessboard_rows_field.place(
@@ -352,7 +355,7 @@ class SettingsPage(Page):
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
-            justify='center'
+            justify="center"
         )
 
         self.calibration_images_needed_field.place(
@@ -373,7 +376,7 @@ class SettingsPage(Page):
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
-            justify='center'
+            justify="center"
         )
 
         self.save_img_char_field.place(
@@ -386,10 +389,9 @@ class SettingsPage(Page):
         self.start_scan_char_field.update_setting()
         self.stop_camera_char_field.update_setting()
         self.camera_address_info.update_setting()
-        self.aruco_area_field.update_setting()
-        perim = math.sqrt(float(self.aruco_area_field.get())) * 4
-        SettingsDecoder.set_attribute('ARUCO_PERIM_IN_CM', perim)
         self.scan_duration_field.update_setting()
+        self.show_segment_length_char_field.update_setting()
+        self.erase_segment_char_field.update_setting()
         self.padding_field.update_setting()
         self.center_boundary_field.update_setting()
         self.chessboard_cols_field.update_setting()
