@@ -116,10 +116,13 @@ class InputSelectionPage(Page):
 
     def get_results_and_go_to_recap_page(self, object_detector, status):
         if status is True:
+            i = 0
             for shape in object_detector.shapes:
+                print(f"{i}")
                 print(f"area: {shape.average_area / object_detector.pixel_cm_squared_ratio}")
                 print(f"perimeter: {shape.average_perim / object_detector.pixel_cm_ratio}")
                 print("================")
+                i += 1
 
             cropped_images = self.crop_shapes(object_detector.img, object_detector.shapes)
             self.to_page(

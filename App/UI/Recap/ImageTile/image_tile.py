@@ -70,3 +70,4 @@ class ImageTile(Frame):
 
     def click(self, event):
         cv2.imshow(f"{self.img_name}", self.img)
+
