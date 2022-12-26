@@ -108,9 +108,4 @@ class RecapPage(Page):
 
     def save_cropped_images(self):
         for i in range(len(self.cropped_shapes)):
-            #print(self.cropped_shapes[i][0].area)
-            #print(self.cropped_shapes[i][0].perim)
-            #print(self.cropped_shapes[i][0].cropped_img)
-
-            cv2.imwrite(f"img{i}.png", self.cropped_shapes[i][0].cropped_img)
-        # save images in a PDF file
+            cv2.imwrite(f"Results/scan{i + 1}.png", self.cropped_shapes[i][0].cropped_img)

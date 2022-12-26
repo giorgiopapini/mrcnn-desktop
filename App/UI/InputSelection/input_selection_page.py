@@ -124,7 +124,13 @@ class InputSelectionPage(Page):
                 print("================")
                 i += 1
 
-            cropped_shapes = self.crop_shapes(object_detector.img, object_detector.shapes)
+            cropped_shapes = self.crop_shapes(
+                object_detector.img,
+                object_detector.shapes,
+                object_detector.pixel_cm_ratio,
+                object_detector.pixel_cm_squared_ratio
+            )
+
             self.to_page(
                 page=RecapPage,
                 previous_page=self.previous_page,
@@ -132,6 +138,6 @@ class InputSelectionPage(Page):
                 cropped_shapes=cropped_shapes
             )
 
-    def crop_shapes(self, original_img, shapes):
-        cropper = Cropper(original_img, shapes)
+    def crop_shapes(self, original_img, shapes, pixel_cm_ratio, pixel_cm_squared_ratio):
+        cropper = Cropper(original_img, shapes, pixel_cm_ratio, pixel_cm_squared_ratio)
         return cropper.get_cropped_shapes()

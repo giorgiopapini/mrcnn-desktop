@@ -8,10 +8,12 @@ from App.UI.Common.SettingsDecoder import SettingsDecoder
 
 
 class Cropper:
-    def __init__(self, original_img, shapes):
+    def __init__(self, original_img, shapes, pixel_cm_ratio, pixel_cm_squared_ratio):
         self.PADDING_PIXELS = SettingsDecoder['PADDING_PIXELS']
         self.original_img = original_img
         self.shapes = shapes
+        self.pixel_cm_ratio = pixel_cm_ratio
+        self.pixel_cm_squared_ratio = pixel_cm_squared_ratio
 
     def get_cropped_shapes(self):
         cropped_shapes = []
@@ -34,7 +36,9 @@ class Cropper:
                :(x + w + self.PADDING_PIXELS if x + w + self.PADDING_PIXELS < img_width else x + h)
                ]
         cropped_img = self.get_resized_cropped_img(cropped_img)
-        cropped_shape = CroppedShape(shape.average_area, shape.average_perim, cropped_img)
+        area_cm, perim_cm = self.get_area_and_perim_in_cm(shape)
+        cropped_img = self.add_data_to_img(cropped_img, area_cm, perim_cm)
+        cropped_shape = CroppedShape(area_cm, perim_cm, cropped_img)
 
         return cropped_shape
 
@@ -58,3 +62,32 @@ class Cropper:
         dim = (int(new_width), int(new_height))
         resized = cv2.resize(img, dim)
         return resized
+
+    def get_area_and_perim_in_cm(self, shape):
+        area_cm = shape.average_area / self.pixel_cm_squared_ratio
+        perim_cm = shape.average_perim / self.pixel_cm_ratio
+        return area_cm, perim_cm
+
+    def add_data_to_img(self, img, area_cm, perim_cm):
+        data_img = cv2.copyMakeBorder(img, 70, 0, 0, 0, cv2.BORDER_CONSTANT, value=[0, 0, 0])
+        cv2.putText(
+            data_img,
+            f"Area: {area_cm} cm^2",
+            (20, 25),
+            cv2.FONT_HERSHEY_DUPLEX,
+            .7,
+            (0, 255, 0),
+            2
+        )
+
+        cv2.putText(
+            data_img,
+            f"Perimetro: {perim_cm} cm",
+            (20, 55),
+            cv2.FONT_HERSHEY_DUPLEX,
+            .7,
+            (0, 255, 0),
+            2
+        )
+
+        return data_img
