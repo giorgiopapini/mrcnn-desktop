@@ -31,3 +31,10 @@ class FormField(Entry):
     def update_setting(self):
         converted_data = self.input_type.get_converted_data(self.get())
         SettingsDecoder.set_attribute(self.setting, converted_data)
+
+    def override_text(self, text):
+        self.clear_form()
+        self.insert(0, text)
+
+    def clear_form(self):
+        self.delete(0, END)

@@ -9,6 +9,11 @@ FRAME_HEIGHT = 540
 FRAME_WIDTH = 960
 
 
+# ========== CROPPED IMAGES RESIZE PROCESS ==========
+CONST_WIDTH = 720
+CONST_HEIGHT = 576
+
+
 # ========== DATA TYPES ENUM FOR FORMFIELD CLASS ==========
 class DataTypes(Enum):
     STR = String

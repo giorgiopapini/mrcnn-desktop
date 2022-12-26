@@ -13,9 +13,10 @@ class RecapPage(Page):
     BACK_ARROW_IMG_PATH = "App/UI/Settings/back_arrow.png"
     SAVE_RECAP_IMG_PATH = "App/UI/Settings/save.png"
 
-    def __init__(self, root, cropped_images=None, **kwargs):
+    def __init__(self, root, cropped_shapes=None, **kwargs):
         super().__init__(root, **kwargs)
-        self.cropped_images = cropped_images
+        self.cropped_shapes = cropped_shapes
+        print(self.cropped_shapes)
 
         self.background_img = PhotoImage(file=self.BACKGROUND_IMG_PATH)
         self.back_arrow_img = PhotoImage(file=self.BACK_ARROW_IMG_PATH)
@@ -82,7 +83,7 @@ class RecapPage(Page):
 
     def get_images(self):
         images_list = []
-        for img_tuple in self.cropped_images:
+        for img_tuple in self.cropped_shapes:
             images_list.append(
                 ListElement(
                     widget=ImageTile,
@@ -97,7 +98,7 @@ class RecapPage(Page):
     def delete_shape(self, shape_to_delete):
         try:
             print(shape_to_delete)
-            self.cropped_images.remove(shape_to_delete)
+            self.cropped_shapes.remove(shape_to_delete)
             self.images_list.refresh_list(
                 parent_frame=self.images_list_frame,
                 elements=self.get_images()
@@ -106,6 +107,10 @@ class RecapPage(Page):
             pass
 
     def save_cropped_images(self):
-        for i in range(len(self.cropped_images)):
-            cv2.imwrite(f"img{i}.png", self.cropped_images[i][0])
+        for i in range(len(self.cropped_shapes)):
+            #print(self.cropped_shapes[i][0].area)
+            #print(self.cropped_shapes[i][0].perim)
+            #print(self.cropped_shapes[i][0].cropped_img)
+
+            cv2.imwrite(f"img{i}.png", self.cropped_shapes[i][0].cropped_img)
         # save images in a PDF file

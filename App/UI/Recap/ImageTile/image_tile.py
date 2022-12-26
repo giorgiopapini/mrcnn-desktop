@@ -10,7 +10,7 @@ class ImageTile(Frame):
     def __init__(self, genesis_root=None, img_tuple=None, callback_on_delete=None, **kwargs):
         super().__init__(**kwargs)
         self.genesis_root = genesis_root
-        self.img = img_tuple[0]
+        self.img = img_tuple[0].cropped_img
         self.img_name = img_tuple[1]
         self.callback_on_delete = callback_on_delete  # call it when delete btn is pressed, it deletes the shape from array in RecapPage
 

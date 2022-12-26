@@ -126,7 +126,7 @@ class CmPerPixelPage(Page):
         self.__try_load_ratio()
 
         self.aruco_area_form = self.canvas.create_image(
-            455.5, 315.5,
+            444.5, 315.5,
             image=self.form_field_img
         )
 
@@ -141,7 +141,7 @@ class CmPerPixelPage(Page):
         )
 
         self.aruco_area_form.place(
-            x=429, y=307.4,
+            x=418, y=307.4,
             width=53,
             height=19
         )
@@ -189,6 +189,9 @@ class CmPerPixelPage(Page):
         return pixel_cm_ratio, pixel_cm_squared_ratio
 
     def start_aruco_marker_detection(self):
-        self.aruco_area_form.update_setting()
-        aruco_detector = ArucoDetector()
-        aruco_detector.start()
+        if float(self.aruco_area_form.get()) > 0:
+            self.aruco_area_form.update_setting()
+            aruco_detector = ArucoDetector()
+            aruco_detector.start()
+        else:
+            self.aruco_area_form.override_text(1)

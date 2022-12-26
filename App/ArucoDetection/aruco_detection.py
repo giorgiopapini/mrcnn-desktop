@@ -105,6 +105,11 @@ class ArucoDetector:
             )
             self.is_aruco_located = False
 
+    def __get_real_ratio(self, pixels, cm):
+        if cm > 0:
+            return pixels / cm
+        return 0
+
     def get_key_pressed(self):
         keys = cv2.waitKey(1) & 0xFF
 
