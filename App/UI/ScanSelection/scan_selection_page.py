@@ -3,6 +3,7 @@ from tkinter import *
 from App.ShapeDetection.adaptive_threshold_shape_detector import AdaptiveThresholdShapeDetector
 from App.ShapeDetection.basic_shape_detector import BasicShapeDetector
 from App.ShapeDetection.manual_shape_detector import ManualShapeDetector
+from App.ShapeDetection.mrcnn_mask_detector import MRCNNShapeDetector
 from App.UI.InputSelection.input_selection_page import InputSelectionPage
 from App.UI.page import Page
 
@@ -115,7 +116,12 @@ class ScanSelectionPage(Page):
             image=self.scan_btn_img,
             borderwidth=0,
             highlightthickness=0,
-            command=self.btn_clicked,
+            command=lambda: self.to_page(
+                page=InputSelectionPage,
+                homepage=self.homepage,
+                previous_page=ScanSelectionPage,
+                detector_class=MRCNNShapeDetector,
+            ),
             relief="flat",
             cursor="hand2"
         )

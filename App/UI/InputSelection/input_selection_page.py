@@ -106,9 +106,6 @@ class InputSelectionPage(Page):
             height=19
         )
 
-    def btn_clicked(self):
-        pass
-
     def start_scanning(self, input_type=constants.DetectionInputType.VIDEO, img_path=""):
         object_detector = self.detector_class(input_type=input_type, img_path=img_path)
         status = object_detector.start()
@@ -116,14 +113,6 @@ class InputSelectionPage(Page):
 
     def get_results_and_go_to_recap_page(self, object_detector, status):
         if status is True:
-            i = 0
-            for shape in object_detector.shapes:
-                print(f"{i}")
-                print(f"area: {shape.average_area / object_detector.pixel_cm_squared_ratio}")
-                print(f"perimeter: {shape.average_perim / object_detector.pixel_cm_ratio}")
-                print("================")
-                i += 1
-
             cropped_shapes = self.crop_shapes(
                 object_detector.img,
                 object_detector.shapes,

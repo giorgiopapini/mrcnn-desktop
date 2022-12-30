@@ -14,6 +14,10 @@ CONST_WIDTH = 720
 CONST_HEIGHT = 576
 
 
+# ========== MRCNN MASK IMAGES SIZE ==========
+MRCNN_SIZE = 224
+
+
 # ========== DATA TYPES ENUM FOR FORMFIELD CLASS ==========
 class DataTypes(Enum):
     STR = String
