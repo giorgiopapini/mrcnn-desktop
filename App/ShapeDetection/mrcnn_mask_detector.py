@@ -8,7 +8,7 @@ from App.Camera.PictureTaker import PictureTaker
 from App.Camera.camera_object import Camera
 from App.ShapeDetection.shape import Shape
 from App.UI.Common.SettingsDecoder import SettingsDecoder
-from App.ShapeDetection.mrcnn.mrcmm_executor import MRCNNExecutor
+from App.ShapeDetection.mrcnn.mrcnn_executor import MRCNNExecutor
 
 
 class MRCNNShapeDetector:

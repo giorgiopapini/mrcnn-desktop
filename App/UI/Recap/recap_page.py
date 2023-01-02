@@ -97,7 +97,6 @@ class RecapPage(Page):
 
     def delete_shape(self, shape_to_delete):
         try:
-            print(shape_to_delete)
             self.cropped_shapes.remove(shape_to_delete)
             self.images_list.refresh_list(
                 parent_frame=self.images_list_frame,
