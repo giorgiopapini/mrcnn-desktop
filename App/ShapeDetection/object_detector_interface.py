@@ -3,7 +3,7 @@ import abc
 
 class ObjectDetectorInterface(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def start(self):
+    def try_start(self):
         pass
 
     @abc.abstractmethod

@@ -32,8 +32,6 @@ class MRCNNShapeDetector:
         self.camera.try_calc_undistorted_camera_matrix()
 
         self.__try_load_ratios()
-        self.__capture_img()
-        self.__execute_mask_rcnn()
 
     def __try_load_ratios(self):
         try:
@@ -80,11 +78,19 @@ class MRCNNShapeDetector:
             new_img = cv2.copyMakeBorder(self.img, 0, delta, 0, 0, cv2.BORDER_CONSTANT, value=[0, 0, 0])
         return cv2.resize(new_img, (constants.MRCNN_SIZE, constants.MRCNN_SIZE))
 
-    def start(self):
+    def try_start(self):
+        try:
+            self.__start()
+        except:
+            return False
+
+    def __start(self):
+        self.__capture_img()
         if self.img is None:
             cv2.destroyAllWindows()
             return False
         else:
+            self.__execute_mask_rcnn()
             while True:
                 self.img_contour = self.img.copy()
                 self.__write_commands()

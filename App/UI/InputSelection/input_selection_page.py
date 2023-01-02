@@ -1,8 +1,7 @@
 from tkinter import *
 
 import constants
-from App.ShapeDetection.cropper import Cropper
-from App.UI.Recap.recap_page import RecapPage
+from App.UI.Scan.scan_page import ScanPage
 from App.UI.page import Page
 
 
@@ -108,25 +107,9 @@ class InputSelectionPage(Page):
 
     def start_scanning(self, input_type=constants.DetectionInputType.VIDEO, img_path=""):
         object_detector = self.detector_class(input_type=input_type, img_path=img_path)
-        status = object_detector.start()
-        self.get_results_and_go_to_recap_page(object_detector, status)
-
-    def get_results_and_go_to_recap_page(self, object_detector, status):
-        if status is True:
-            cropped_shapes = self.crop_shapes(
-                object_detector.img,
-                object_detector.shapes,
-                object_detector.pixel_cm_ratio,
-                object_detector.pixel_cm_squared_ratio
-            )
-
-            self.to_page(
-                page=RecapPage,
-                previous_page=self.previous_page,
-                homepage=self.homepage,
-                cropped_shapes=cropped_shapes
-            )
-
-    def crop_shapes(self, original_img, shapes, pixel_cm_ratio, pixel_cm_squared_ratio):
-        cropper = Cropper(original_img, shapes, pixel_cm_ratio, pixel_cm_squared_ratio)
-        return cropper.get_cropped_shapes()
+        self.to_page(
+            page=ScanPage,
+            homepage=self.homepage,
+            previous_page=self.previous_page,
+            object_detector=object_detector
+        )

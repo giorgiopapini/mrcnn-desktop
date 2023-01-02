@@ -13,7 +13,9 @@ class ArucoDetector:
     pixel_cm_squared_ratio = 0
     pixel_cm_ratio = 0
 
-    def __init__(self):
+    def __init__(self, callback_on_save=None):
+        self.callback_on_save = callback_on_save
+
         self.SCAN_CHAR = SettingsDecoder['SCAN_CHAR']
         self.QUIT_CHAR = SettingsDecoder['QUIT_CHAR']
         self.camera = Camera()
@@ -128,3 +130,6 @@ class ArucoDetector:
                 indent=4
             )
             file.write(json_data)
+
+        self.callback_on_save()
+

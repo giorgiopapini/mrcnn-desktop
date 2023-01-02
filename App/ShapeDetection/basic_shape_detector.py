@@ -66,7 +66,14 @@ class BasicShapeDetector(ObjectDetectorInterface):
         cv2.createTrackbar("Threshold1", constants.PARAMETERS_WINDOW_NAME, 46, 255, constants.empty)
         cv2.createTrackbar("Threshold2", constants.PARAMETERS_WINDOW_NAME, 46, 255, constants.empty)
 
-    def start(self):
+    def try_start(self):
+        try:
+            self.__start()
+        except:
+            cv2.destroyAllWindows()
+            return False
+
+    def __start(self):
         while True:
             self.img = self.input_type.read(
                 self.cap,

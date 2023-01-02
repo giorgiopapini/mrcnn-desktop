@@ -161,10 +161,7 @@ class CmPerPixelPage(Page):
     def __try_save_ratios(self):
         try:
             self.__save_ratios_in_json()
-            self.to_page(
-                page=self.homepage,
-                homepage=self.homepage,
-            )
+            self.to_page(page=self.homepage)
         except (ValueError, ZeroDivisionError):
             print("failed")
             pass
@@ -191,7 +188,7 @@ class CmPerPixelPage(Page):
     def start_aruco_marker_detection(self):
         if float(self.aruco_area_form.get()) > 0:
             self.aruco_area_form.update_setting()
-            aruco_detector = ArucoDetector()
+            aruco_detector = ArucoDetector(callback_on_save=lambda: self.to_page(page=self.homepage))
             aruco_detector.start()
         else:
             self.aruco_area_form.override_text(1)

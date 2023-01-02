@@ -131,6 +131,3 @@ class ScanSelectionPage(Page):
             width=30,
             height=31
         )
-
-    def btn_clicked(self):
-        pass

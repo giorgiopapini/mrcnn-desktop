@@ -42,7 +42,6 @@ class ManualShapeDetector:
         self.camera.try_calc_undistorted_camera_matrix()
 
         self.__try_load_ratios()
-        self.__capture_img()
 
     def __try_load_ratios(self):
         try:
@@ -64,7 +63,14 @@ class ManualShapeDetector:
             picture_taker = PictureTaker()
             self.img = picture_taker.take_picture()
 
-    def start(self):
+    def try_start(self):
+        try:
+            self.__start()
+        except:
+            return False
+
+    def __start(self):
+        self.__capture_img()
         if self.img is None:
             cv2.destroyAllWindows()
             return False
