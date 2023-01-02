@@ -68,7 +68,8 @@ class BasicShapeDetector(ObjectDetectorInterface):
 
     def try_start(self):
         try:
-            self.__start()
+            status = self.__start()
+            return status
         except:
             cv2.destroyAllWindows()
             return False

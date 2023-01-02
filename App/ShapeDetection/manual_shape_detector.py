@@ -65,7 +65,8 @@ class ManualShapeDetector:
 
     def try_start(self):
         try:
-            self.__start()
+            status = self.__start()
+            return status
         except:
             return False
 
