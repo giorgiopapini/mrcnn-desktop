@@ -25,7 +25,6 @@ class PictureTaker:
                 self.camera.distortion_data,
                 self.camera.undistorted_camera_matrix
             )
-            self.real_img = cv2.resize(self.real_img, (constants.FRAME_WIDTH, constants.FRAME_HEIGHT))
 
             command_img = self.real_img.copy()
             self.__show_commands(command_img)

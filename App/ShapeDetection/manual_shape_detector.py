@@ -58,7 +58,12 @@ class ManualShapeDetector:
 
     def __capture_img(self):
         if self.input_type == constants.DetectionInputType.IMAGE.value:
-            self.img = self.cap.copy()
+            self.img = self.input_type.read(
+                self.cap,
+                self.camera.camera_matrix,
+                self.camera.distortion_data,
+                self.camera.undistorted_camera_matrix
+            )
         else:
             picture_taker = PictureTaker()
             self.img = picture_taker.take_picture()

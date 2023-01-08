@@ -1,6 +1,8 @@
 import cv2
 import abc
 
+import constants
+
 
 class InputTypeInterface:
     __metaclass__ = abc.ABCMeta
@@ -14,6 +16,25 @@ class InputTypeInterface:
     @abc.abstractmethod
     def read(data, camera_matrix, distortion_data, undistorted_camera_matrix):
         pass
+
+    @staticmethod
+    def resize(img):
+        dim = None
+        (h, w) = img.shape[:2]
+        desired_width = constants.FRAME_WIDTH if w > h else None
+        desired_height = constants.FRAME_HEIGHT if h > w else None
+
+        if desired_width is None and desired_height is None:
+            return img
+
+        if desired_width is None:
+            r = desired_height / float(h)
+            dim = (int(w * r), desired_height)
+        else:
+            r = desired_width / float(w)
+            dim = (desired_width, int(h * r))
+
+        return cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
 
 
 class Video(InputTypeInterface):
@@ -34,7 +55,7 @@ class Video(InputTypeInterface):
             None,
             undistorted_camera_matrix
         )
-        return img
+        return Video.resize(img)
 
 
 class Image(InputTypeInterface):
@@ -45,4 +66,4 @@ class Image(InputTypeInterface):
 
     @staticmethod
     def read(img, camera_matrix, distortion_data, undistorted_camera_matrix):
-        return img
+        return Image.resize(img)

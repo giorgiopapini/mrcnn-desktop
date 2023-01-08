@@ -82,7 +82,6 @@ class BasicShapeDetector(ObjectDetectorInterface):
                 self.camera.distortion_data,
                 self.camera.undistorted_camera_matrix
             )
-            self.img = cv2.resize(self.img, (constants.FRAME_WIDTH, constants.FRAME_HEIGHT))
 
             img_gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
             img_blur = cv2.GaussianBlur(img_gray, (7, 7), 0)
