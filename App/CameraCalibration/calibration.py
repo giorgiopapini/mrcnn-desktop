@@ -51,9 +51,9 @@ class Calibrator:
         index = 0
         while True:
             success, real_img = cap.read()
+            real_img = constants.Video.resize(real_img)
 
             img = real_img.copy()
-            img = cv2.resize(img, (960, 540))
 
             self.__manage_image_saving()
             self.__try_show_commands(img=img)

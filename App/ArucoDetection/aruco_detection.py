@@ -35,7 +35,7 @@ class ArucoDetector:
                 None,
                 self.camera.undistorted_camera_matrix
             )
-            undistorted_img = cv2.resize(undistorted_img, (960, 540))
+            undistorted_img = constants.Video.resize(undistorted_img)
 
             self.__try_locate_aruco_marker(img=undistorted_img)
             self.__try_show_commands(img=undistorted_img)
