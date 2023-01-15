@@ -1,6 +1,7 @@
 from tkinter import *
 
-from App.ShapeDetection.cropper import Cropper
+from App.ShapeDetection.Cropper.cropper import Cropper
+from App.ShapeDetection.ImageWriter.image_data_writer import DataWriter
 from App.UI.Recap.recap_page import RecapPage
 from App.UI.page import Page
 
@@ -45,11 +46,13 @@ class ScanPage(Page):
                 object_detector.pixel_cm_squared_ratio
             )
 
+            final_shapes = self.add_data_to_images(cropped_shapes)
+
             self.to_page(
                 page=RecapPage,
                 previous_page=self.previous_page,
                 homepage=self.homepage,
-                cropped_shapes=cropped_shapes
+                final_shapes=final_shapes
             )
         else:
             self.to_page(
@@ -60,3 +63,7 @@ class ScanPage(Page):
     def crop_shapes(self, original_img, shapes, pixel_cm_ratio, pixel_cm_squared_ratio):
         cropper = Cropper(original_img, shapes, pixel_cm_ratio, pixel_cm_squared_ratio)
         return cropper.get_cropped_shapes()
+
+    def add_data_to_images(self, cropped_shapes):
+        data_writer = DataWriter(cropped_shapes)
+        return data_writer.get_final_shapes()

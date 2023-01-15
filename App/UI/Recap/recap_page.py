@@ -13,10 +13,9 @@ class RecapPage(Page):
     BACK_ARROW_IMG_PATH = "App/UI/Settings/back_arrow.png"
     SAVE_RECAP_IMG_PATH = "App/UI/Settings/save.png"
 
-    def __init__(self, root, cropped_shapes=None, **kwargs):
+    def __init__(self, root, final_shapes=None, **kwargs):
         super().__init__(root, **kwargs)
-        self.cropped_shapes = cropped_shapes
-        print(self.cropped_shapes)
+        self.final_shapes = final_shapes
 
         self.background_img = PhotoImage(file=self.BACKGROUND_IMG_PATH)
         self.back_arrow_img = PhotoImage(file=self.BACK_ARROW_IMG_PATH)
@@ -83,7 +82,7 @@ class RecapPage(Page):
 
     def get_images(self):
         images_list = []
-        for img_tuple in self.cropped_shapes:
+        for img_tuple in self.final_shapes:
             images_list.append(
                 ListElement(
                     widget=ImageTile,
@@ -97,7 +96,7 @@ class RecapPage(Page):
 
     def delete_shape(self, shape_to_delete):
         try:
-            self.cropped_shapes.remove(shape_to_delete)
+            self.final_shapes.remove(shape_to_delete)
             self.images_list.refresh_list(
                 parent_frame=self.images_list_frame,
                 elements=self.get_images()
@@ -106,6 +105,6 @@ class RecapPage(Page):
             pass
 
     def save_cropped_images(self):
-        for i in range(len(self.cropped_shapes)):
-            cv2.imwrite(f"Results/scan{i + 1}.png", self.cropped_shapes[i][0].cropped_img)
+        for i in range(len(self.final_shapes)):
+            cv2.imwrite(f"Results/scan{i + 1}.png", self.final_shapes[i][0].final_img)
         self.to_page(page=self.homepage)

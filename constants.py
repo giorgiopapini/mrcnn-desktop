@@ -5,6 +5,7 @@ from App.UI.Common.DetectionInputTypes import Video, Image
 
 BACKSPACE_KEYSYM_NUM = 65288
 SETTINGS_FILE_NAME = "settings.json"
+CLASSIFICATION_FILE_NAME = "classification.json"
 FRAME_HEIGHT = 540
 FRAME_WIDTH = 960
 

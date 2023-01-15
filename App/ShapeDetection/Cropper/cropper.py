@@ -1,9 +1,7 @@
-from datetime import datetime
-
 import cv2
 
 import constants
-from App.ShapeDetection.cropped_shape import CroppedShape
+from App.ShapeDetection.Cropper.cropped_shape import CroppedShape
 from App.UI.Common.SettingsDecoder import SettingsDecoder
 
 
@@ -19,9 +17,7 @@ class Cropper:
         cropped_shapes = []
         for i in range(len(self.shapes)):
             cropped_shape = self.__try_get_cropped_shape(self.shapes[i])
-            cropped_shapes.append(
-                (cropped_shape, f"{datetime.now()} ({i + 1})")
-            )
+            cropped_shapes.append(cropped_shape)
         return cropped_shapes
 
     def __try_get_cropped_shape(self, shape):
@@ -37,7 +33,6 @@ class Cropper:
                ]
         cropped_img = self.get_resized_cropped_img(cropped_img)
         area_cm, perim_cm = self.get_area_and_perim_in_cm(shape)
-        cropped_img = self.add_data_to_img(cropped_img, area_cm, perim_cm)
         cropped_shape = CroppedShape(area_cm, perim_cm, cropped_img)
 
         return cropped_shape
@@ -67,27 +62,3 @@ class Cropper:
         area_cm = shape.average_area / self.pixel_cm_squared_ratio
         perim_cm = shape.average_perim / self.pixel_cm_ratio
         return area_cm, perim_cm
-
-    def add_data_to_img(self, img, area_cm, perim_cm):
-        data_img = cv2.copyMakeBorder(img, 70, 0, 0, 0, cv2.BORDER_CONSTANT, value=[0, 0, 0])
-        cv2.putText(
-            data_img,
-            f"Area: {area_cm} cm^2",
-            (20, 25),
-            cv2.FONT_HERSHEY_DUPLEX,
-            .7,
-            (0, 255, 0),
-            2
-        )
-
-        cv2.putText(
-            data_img,
-            f"Perimetro: {perim_cm} cm",
-            (20, 55),
-            cv2.FONT_HERSHEY_DUPLEX,
-            .7,
-            (0, 255, 0),
-            2
-        )
-
-        return data_img
