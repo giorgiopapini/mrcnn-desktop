@@ -18,14 +18,14 @@ class SettingsDecoder:
 
     @staticmethod
     def save_current_settings_to_json():
-        data = SettingsDecoder.get_decoded_json()
+        json_data = SettingsDecoder.get_decoded_json()
         attributes = vars(SettingsDecoder)
         for attr_name in attributes:
-            if attr_name in data:
-                data[attr_name] = attributes[attr_name]
+            if attr_name in json_data:
+                json_data[attr_name] = attributes[attr_name]
 
         with open(constants.SETTINGS_FILE_NAME, 'w') as file:
-            json.dump(data, file)
+            json.dump(json_data, file)
 
     @staticmethod
     def get_decoded_json():

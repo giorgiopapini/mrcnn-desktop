@@ -2,6 +2,7 @@ import json
 from tkinter import *
 from App.ArucoDetection.aruco_detection import ArucoDetector
 from App.UI.Common.FormField import FormField
+from App.UI.Common.SettingsDecoder import SettingsDecoder
 from App.UI.page import Page
 import constants
 
@@ -146,6 +147,16 @@ class CmPerPixelPage(Page):
             height=19
         )
 
+        self.aruco_perim_form = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.FLOAT,
+            setting="ARUCO_PERIM_IN_CM",
+            bd=0,
+            bg="#ffffff",
+            highlightthickness=0,
+            justify='center'
+        )
+
     def __try_load_ratio(self):
         try:
             self.__load_ratio()
@@ -164,7 +175,6 @@ class CmPerPixelPage(Page):
             self.to_page(page=self.homepage)
         except (ValueError, ZeroDivisionError):
             print("failed")
-            pass
 
     def __save_ratios_in_json(self):
         pixel_cm_ratio, pixel_cm_squared_ratio = self.get_ratios()
@@ -187,8 +197,19 @@ class CmPerPixelPage(Page):
 
     def start_aruco_marker_detection(self):
         if float(self.aruco_area_form.get()) > 0:
-            self.aruco_area_form.update_setting()
+            self.update_aruco_settings_json()
             aruco_detector = ArucoDetector(callback_on_save=lambda: self.to_page(page=self.homepage))
             aruco_detector.start()
         else:
             self.aruco_area_form.override_text(1)
+
+    def update_aruco_settings_json(self):
+        self.aruco_area_form.update_setting()
+        self.set_aruco_perim_form()
+        self.aruco_perim_form.update_setting()
+        SettingsDecoder.save_current_settings_to_json()
+
+    def set_aruco_perim_form(self):
+        segment = float(self.aruco_area_form.get()) ** 0.5
+        perim = segment * 4
+        self.aruco_perim_form.override_text(perim)
