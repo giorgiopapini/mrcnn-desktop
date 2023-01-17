@@ -1,6 +1,7 @@
 import cv2
 from keras.models import load_model
 
+from App.ShapeDetection.MaskRefiner.mask_refiner import MaskRefiner
 from App.ShapeDetection.mrcnn.models.deeplab import Deeplabv3, relu6, BilinearUpsampling, DepthwiseConv2D
 from App.ShapeDetection.mrcnn.utils.learning.metrics import dice_coef, precision, recall
 from App.ShapeDetection.mrcnn.utils.io.data import save_results, load_test_images, DataGen
@@ -10,7 +11,6 @@ import constants
 
 class MRCNNExecutor:
     COLOR_SPACE = 'rgb'
-    #PATH = './data/Medetec_foot_ulcer_224/'
     PATH = './App/ShapeDetection/mrcnn/data/Medetec_foot_ulcer_224/'
     MODEL_FILENAME = '2019-12-19 01%3A53%3A15.480800.hdf5'
     SAVE_PATH = '2019-12-19 01%3A53%3A15.480800/'
@@ -39,7 +39,15 @@ class MRCNNExecutor:
         for image_batch, label_batch in data_gen.generate_data(batch_size=len(x_test), test=True):
             prediction = model.predict(image_batch, verbose=1)
             save_results(prediction, 'rgb', self.PATH + 'test/predictions/' + self.SAVE_PATH, test_label_filenames_list)
+            self.refine_mask_with_grabcut()
             break
+
+    def refine_mask_with_grabcut(self):
+        refined_mask = MaskRefiner.get_refined_mask_with_grabcut(
+            img=self.img,
+            mask=self.get_saved_mask()
+        )
+        cv2.imwrite(f"{self.PATH}test/predictions/2019-12-19 01%3A53%3A15.480800/original.png", refined_mask)
 
     def get_saved_mask(self):
         mask = cv2.imread(f"{self.PATH}test/predictions/2019-12-19 01%3A53%3A15.480800/original.png").astype('uint8') * 255
