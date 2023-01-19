@@ -6,6 +6,7 @@ import cv2
 
 from App.Camera.PictureTaker import PictureTaker
 from App.Camera.camera_object import Camera
+from App.ShapeDetection.MaskRefiner.mask_refiner import MaskRefiner
 from App.ShapeDetection.shape import Shape
 from App.UI.Common.SettingsDecoder import SettingsDecoder
 from App.ShapeDetection.mrcnn.mrcnn_executor import MRCNNExecutor
@@ -18,10 +19,13 @@ class MRCNNShapeDetector:
 
         self.SCAN_CHAR = SettingsDecoder['SCAN_CHAR']
         self.QUIT_CHAR = SettingsDecoder['QUIT_CHAR']
+        self.CHANGE_MASK_CHAR = SettingsDecoder['CHANGE_MASK_CHAR']
 
         self.img = None
         self.img_contour = None
         self.mask = None
+        self.grabcut_mask = None
+        self.active_mask = None
 
         self.pixel_cm_squared_ratio = 0
         self.pixel_cm_ratio = 0
@@ -62,7 +66,14 @@ class MRCNNShapeDetector:
         resized_img = self.__get_resized_img_to_mrcnn_required_size()
         mrcnn_executor = MRCNNExecutor(img=resized_img)
         mrcnn_executor.generate_and_save_mask()
+
         raw_mask = mrcnn_executor.get_saved_mask()
+        raw_grabcut = MaskRefiner.get_refined_mask_with_grabcut(
+            resized_img,
+            raw_mask
+        )
+
+        self.grabcut_mask = self.__get_resized_mask_to_original_size(raw_grabcut)
         self.mask = self.__get_resized_mask_to_original_size(raw_mask)
 
     def __get_resized_mask_to_original_size(self, mask):
@@ -97,6 +108,7 @@ class MRCNNShapeDetector:
             return False
         else:
             self.__execute_mask_rcnn()
+            self.active_mask = self.mask
             while True:
                 self.img_contour = self.img.copy()
                 self.__write_commands()
@@ -110,6 +122,8 @@ class MRCNNShapeDetector:
                 elif key == self.QUIT_CHAR:
                     cv2.destroyAllWindows()
                     return False
+                elif key == self.CHANGE_MASK_CHAR:
+                    self.__change_active_mask()
                 elif cv2.getWindowProperty(constants.SHAPE_DETECTION_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
                     return False
 
@@ -134,8 +148,21 @@ class MRCNNShapeDetector:
             2
         )
 
+        cv2.putText(
+            self.img_contour,
+            f"Premi '{self.CHANGE_MASK_CHAR}' per " +
+            ('attivare' if self.active_mask is self.mask else 'disattivare') +
+            " ottimizzazione grabcut",
+            (20, 70),
+            cv2.FONT_HERSHEY_DUPLEX,
+            .7,
+            (255, 0, 0),
+            2
+        )
+
+
     def get_contours(self):
-        contours, hierachy = cv2.findContours(self.mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)  # RETR_CCOMP
+        contours, hierachy = cv2.findContours(self.active_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)  # RETR_CCOMP
         for cnt in contours:
             area = cv2.contourArea(cnt)
             peri = cv2.arcLength(cnt, True)
@@ -245,6 +272,10 @@ class MRCNNShapeDetector:
     def calculate_cm_from_ratio(pixels, pixel_cm_ratio):
         return pixels / pixel_cm_ratio
 
+    def __change_active_mask(self):
+        self.shapes.clear()
+        self.active_mask = self.grabcut_mask if self.active_mask is self.mask else self.mask
+
     def get_pressed_key(self):
         keys = cv2.waitKey(1) & 0xFF
 
@@ -252,3 +283,5 @@ class MRCNNShapeDetector:
             return self.SCAN_CHAR
         elif keys == ord(self.QUIT_CHAR) or keys == ord(self.QUIT_CHAR.upper()):
             return self.QUIT_CHAR
+        elif keys == ord(self.CHANGE_MASK_CHAR) or keys == ord(self.CHANGE_MASK_CHAR.upper()):
+            return self.CHANGE_MASK_CHAR
