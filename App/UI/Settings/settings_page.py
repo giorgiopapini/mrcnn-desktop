@@ -260,6 +260,27 @@ class SettingsPage(Page):
             height=19
         )
 
+        self.manage_grabcut_char_field = self.canvas.create_image(
+            338.5, 418.5,
+            image=self.short_field_img
+        )
+
+        self.manage_grabcut_char_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.CHAR,
+            setting='CHANGE_MASK_CHAR',
+            bd=0,
+            bg="#ffffff",
+            highlightthickness=0,
+            justify="center"
+        )
+
+        self.manage_grabcut_char_field.place(
+            x=313, y=410.4,
+            width=51,
+            height=19
+        )
+
         self.padding_field = self.canvas.create_image(
             526.5, 418.5,
             image=self.extra_short_field_img
@@ -392,6 +413,7 @@ class SettingsPage(Page):
         self.scan_duration_field.update_setting()
         self.show_segment_length_char_field.update_setting()
         self.erase_segment_char_field.update_setting()
+        self.manage_grabcut_char_field.update_setting()
         self.padding_field.update_setting()
         self.center_boundary_field.update_setting()
         self.chessboard_cols_field.update_setting()
