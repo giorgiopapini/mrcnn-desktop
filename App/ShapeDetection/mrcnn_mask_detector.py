@@ -1,3 +1,4 @@
+import multiprocessing
 from tkinter import *
 
 import json
@@ -65,7 +66,7 @@ class MRCNNShapeDetector:
     def __execute_mask_rcnn(self):
         resized_img = self.__get_resized_img_to_mrcnn_required_size()
         mrcnn_executor = MRCNNExecutor(img=resized_img)
-        mrcnn_executor.generate_and_save_mask()
+        self.__create_and_run_mrcnn_process(mrcnn_executor=mrcnn_executor)
 
         raw_mask = mrcnn_executor.get_saved_mask()
         raw_grabcut = MaskRefiner.get_refined_mask_with_grabcut(
@@ -75,6 +76,11 @@ class MRCNNShapeDetector:
 
         self.grabcut_mask = self.__get_resized_mask_to_original_size(raw_grabcut)
         self.mask = self.__get_resized_mask_to_original_size(raw_mask)
+
+    def __create_and_run_mrcnn_process(self, mrcnn_executor):
+        mrcnn_process = multiprocessing.Process(target=mrcnn_executor.generate_and_save_mask)
+        mrcnn_process.start()
+        mrcnn_process.join()
 
     def __get_resized_mask_to_original_size(self, mask):
         height = self.img.shape[0]

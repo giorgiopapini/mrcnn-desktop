@@ -1,7 +1,6 @@
 import cv2
 from keras.models import load_model
 
-from App.ShapeDetection.MaskRefiner.mask_refiner import MaskRefiner
 from App.ShapeDetection.mrcnn.models.deeplab import Deeplabv3, relu6, BilinearUpsampling, DepthwiseConv2D
 from App.ShapeDetection.mrcnn.utils.learning.metrics import dice_coef, precision, recall
 from App.ShapeDetection.mrcnn.utils.io.data import save_results, load_test_images, DataGen
