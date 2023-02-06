@@ -79,7 +79,7 @@ class ArucoDetector:
         try:
             (corners, ids, rejected) = cv2.aruco.detectMarkers(img, aruco_dict, parameters=parameters)
             internal_corners = np.int0(corners)
-            cv2.polylines(img, internal_corners, True, (0, 255, 0), 5)
+            cv2.polylines(img, internal_corners, True, (0, 255, 0), 2)
             self.aruco_area_pixel = cv2.contourArea(corners[0], True)
             self.aruco_perim_pixel = cv2.arcLength(corners[0], True)
 
