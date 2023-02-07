@@ -69,6 +69,8 @@ class MRCNNShapeDetector:
         self.__create_and_run_mrcnn_process(mrcnn_executor=mrcnn_executor)
 
         raw_mask = mrcnn_executor.get_saved_mask()
+        del mrcnn_executor
+
         raw_grabcut = MaskRefiner.get_refined_mask_with_grabcut(
             resized_img,
             raw_mask
