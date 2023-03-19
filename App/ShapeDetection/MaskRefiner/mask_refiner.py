@@ -26,3 +26,4 @@ class MaskRefiner:
         output_mask = (output_mask * 255).astype("uint8")
 
         return output_mask
+

@@ -38,6 +38,12 @@ class MRCNNShapeDetector:
 
         self.__try_load_ratios()
 
+        self.drawing = False  # true if mouse is pressed
+        self.mode = True
+        self.current_former_x = None
+        self.current_former_y = None
+        self.writing_bg = True
+
     def __try_load_ratios(self):
         try:
             self.__load_ratios()
@@ -78,6 +84,35 @@ class MRCNNShapeDetector:
 
         self.grabcut_mask = self.__get_resized_mask_to_original_size(raw_grabcut)
         self.mask = self.__get_resized_mask_to_original_size(raw_mask)
+
+    def draw_mask_grabcut(self, event, former_x, former_y, flags, param):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            self.drawing = True
+            self.writing_bg = True
+            self.current_former_x, self.current_former_y = former_x, former_y
+
+        elif event == cv2.EVENT_LBUTTONUP:
+            self.drawing = False
+
+        if event == cv2.EVENT_RBUTTONDOWN:
+            self.drawing = True
+            self.writing_bg = False
+            self.current_former_x, self.current_former_y = former_x, former_y
+
+        elif event == cv2.EVENT_RBUTTONUP:
+            self.drawing = False
+
+        elif event == cv2.EVENT_MOUSEMOVE:
+            if self.drawing:
+                if self.mode:
+                    if self.writing_bg:
+                        cv2.line(self.grabcut_mask, (self.current_former_x, self.current_former_y), (former_x, former_y), (0, 0, 0), 5)
+                    else:
+                        cv2.line(self.grabcut_mask, (self.current_former_x, self.current_former_y), (former_x, former_y), (255, 255, 255), 5)
+                    self.current_former_x = former_x
+                    self.current_former_y = former_y
+
+        return former_x, former_y
 
     def __create_and_run_mrcnn_process(self, mrcnn_executor):
         mrcnn_process = multiprocessing.Process(target=mrcnn_executor.generate_and_save_mask)
@@ -120,11 +155,13 @@ class MRCNNShapeDetector:
             while True:
                 self.img_contour = self.img.copy()
                 self.__write_commands()
-                self.get_contours()
+                self.get_contours(save_shapes=False)
                 cv2.imshow(constants.SHAPE_DETECTION_WINDOW_NAME, self.img_contour)
+                cv2.setMouseCallback(constants.SHAPE_DETECTION_WINDOW_NAME, self.draw_mask_grabcut)
 
                 key = self.get_pressed_key()
                 if key == self.SCAN_CHAR:
+                    self.get_contours(save_shapes=True)
                     cv2.destroyAllWindows()
                     return True
                 elif key == self.QUIT_CHAR:
@@ -168,8 +205,7 @@ class MRCNNShapeDetector:
             2
         )
 
-
-    def get_contours(self):
+    def get_contours(self, save_shapes=False):
         contours, hierachy = cv2.findContours(self.active_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)  # RETR_CCOMP
         for cnt in contours:
             area = cv2.contourArea(cnt)
@@ -178,7 +214,8 @@ class MRCNNShapeDetector:
             if m['m00'] != 0:
                 cx = int(m['m10'] / m['m00'])
                 cy = int(m['m01'] / m['m00'])
-                self.__update_shapes(cnt, area, peri, cx, cy)
+                if save_shapes:
+                    self.__update_shapes(cnt, area, peri, cx, cy)
                 cv2.drawContours(self.img_contour, cnt, -1, (255, 0, 255), 2)
                 approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
                 x, y, w, h = cv2.boundingRect(approx)
