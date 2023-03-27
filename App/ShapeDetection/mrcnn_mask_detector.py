@@ -106,9 +106,9 @@ class MRCNNShapeDetector:
             if self.drawing:
                 if self.mode:
                     if self.writing_bg:
-                        cv2.line(self.grabcut_mask, (self.current_former_x, self.current_former_y), (former_x, former_y), (0, 0, 0), 5)
+                        cv2.line(self.active_mask, (self.current_former_x, self.current_former_y), (former_x, former_y), (0, 0, 0), 5)
                     else:
-                        cv2.line(self.grabcut_mask, (self.current_former_x, self.current_former_y), (former_x, former_y), (255, 255, 255), 5)
+                        cv2.line(self.active_mask, (self.current_former_x, self.current_former_y), (former_x, former_y), (255, 255, 255), 5)
                     self.current_former_x = former_x
                     self.current_former_y = former_y
 

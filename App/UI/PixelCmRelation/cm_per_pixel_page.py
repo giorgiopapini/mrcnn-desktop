@@ -1,6 +1,7 @@
 import json
 from tkinter import *
 from App.ArucoDetection.aruco_detection import ArucoDetector
+from App.ArucoDetection.aruco_image_detector import ArucoImageDetector
 from App.UI.Common.FormField import FormField
 from App.UI.Common.SettingsDecoder import SettingsDecoder
 from App.UI.page import Page
@@ -12,6 +13,7 @@ class CmPerPixelPage(Page):
     SCAN_BTN_IMG_PATH = "App/UI/ScanSelection/scan_btn.png"
     BACK_ARROW_IMG_PATH = "App/UI/Settings/back_arrow.png"
     FORM_FIELD_IMG_PATH = "App/UI/PixelCmRelation/form_field_img.png"
+    FORM_FIELD_LONG_IMG_PATH = "App/UI/PixelCmRelation/form_field_long_img.png"
 
     def __init__(self, root, **kwargs):
         super().__init__(root, **kwargs)
@@ -20,6 +22,7 @@ class CmPerPixelPage(Page):
         self.scan_btn_img = PhotoImage(file=self.SCAN_BTN_IMG_PATH)
         self.back_arrow_img = PhotoImage(file=self.BACK_ARROW_IMG_PATH)
         self.form_field_img = PhotoImage(file=self.FORM_FIELD_IMG_PATH)
+        self.form_field_long_img = PhotoImage(file=self.FORM_FIELD_LONG_IMG_PATH)
 
         self.canvas = Canvas(
             self.root,
@@ -63,7 +66,22 @@ class CmPerPixelPage(Page):
         )
 
         self.scan_aruco_btn.place(
-            x=521, y=340,
+            x=521, y=331,
+            width=30,
+            height=31
+        )
+
+        self.scan_aruco_from_img_btn = Button(
+            image=self.scan_btn_img,
+            borderwidth=0,
+            highlightthickness=0,
+            command=self.start_aruco_marker_detection_img,
+            relief="flat",
+            cursor="hand2"
+        )
+
+        self.scan_aruco_from_img_btn.place(
+            x=521, y=366,
             width=30,
             height=31
         )
@@ -157,6 +175,22 @@ class CmPerPixelPage(Page):
             justify='center'
         )
 
+        self.aruco_img_form = self.canvas.create_image(
+            431.5, 374.5,
+            image=self.form_field_long_img)
+
+        self.aruco_img_form = Entry(
+            bd=0,
+            bg="#ffffff",
+            highlightthickness=0
+        )
+
+        self.aruco_img_form.place(
+            x=360, y=366.4,
+            width=143,
+            height=19
+        )
+
     def __try_load_ratio(self):
         try:
             self.__load_ratio()
@@ -200,6 +234,14 @@ class CmPerPixelPage(Page):
             self.update_aruco_settings_json()
             aruco_detector = ArucoDetector(callback_on_save=lambda: self.to_page(page=self.homepage))
             aruco_detector.start()
+        else:
+            self.aruco_area_form.override_text(1)
+
+    def start_aruco_marker_detection_img(self):
+        if float(self.aruco_area_form.get()) > 0:
+            self.update_aruco_settings_json()
+            aruco_detector = ArucoImageDetector(callback_on_save=lambda: self.to_page(page=self.homepage))
+            aruco_detector.start(self.aruco_img_form.get())
         else:
             self.aruco_area_form.override_text(1)
 
