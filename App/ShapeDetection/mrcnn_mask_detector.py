@@ -7,6 +7,8 @@ import cv2
 
 from App.Camera.PictureTaker import PictureTaker
 from App.Camera.camera_object import Camera
+from App.ShapeDetection.MaskChooser.mask_chooser import MaskChooser
+from App.ShapeDetection.MaskDrawer.mask_drawer import MaskDrawer
 from App.ShapeDetection.MaskRefiner.mask_refiner import MaskRefiner
 from App.ShapeDetection.shape import Shape
 from App.UI.Common.SettingsDecoder import SettingsDecoder
@@ -24,8 +26,6 @@ class MRCNNShapeDetector:
 
         self.img = None
         self.img_contour = None
-        self.mask = None
-        self.grabcut_mask = None
         self.active_mask = None
 
         self.pixel_cm_squared_ratio = 0
@@ -37,12 +37,6 @@ class MRCNNShapeDetector:
         self.camera.try_calc_undistorted_camera_matrix()
 
         self.__try_load_ratios()
-
-        self.drawing = False  # true if mouse is pressed
-        self.mode = True
-        self.current_former_x = None
-        self.current_former_y = None
-        self.writing_bg = True
 
     def __try_load_ratios(self):
         try:
@@ -82,37 +76,9 @@ class MRCNNShapeDetector:
             raw_mask
         )
 
-        self.grabcut_mask = self.__get_resized_mask_to_original_size(raw_grabcut)
-        self.mask = self.__get_resized_mask_to_original_size(raw_mask)
-
-    def draw_mask_grabcut(self, event, former_x, former_y, flags, param):
-        if event == cv2.EVENT_LBUTTONDOWN:
-            self.drawing = True
-            self.writing_bg = True
-            self.current_former_x, self.current_former_y = former_x, former_y
-
-        elif event == cv2.EVENT_LBUTTONUP:
-            self.drawing = False
-
-        if event == cv2.EVENT_RBUTTONDOWN:
-            self.drawing = True
-            self.writing_bg = False
-            self.current_former_x, self.current_former_y = former_x, former_y
-
-        elif event == cv2.EVENT_RBUTTONUP:
-            self.drawing = False
-
-        elif event == cv2.EVENT_MOUSEMOVE:
-            if self.drawing:
-                if self.mode:
-                    if self.writing_bg:
-                        cv2.line(self.active_mask, (self.current_former_x, self.current_former_y), (former_x, former_y), (0, 0, 0), 5)
-                    else:
-                        cv2.line(self.active_mask, (self.current_former_x, self.current_former_y), (former_x, former_y), (255, 255, 255), 5)
-                    self.current_former_x = former_x
-                    self.current_former_y = former_y
-
-        return former_x, former_y
+        grabcut_mask = self.__get_resized_mask_to_original_size(raw_grabcut)
+        mask = self.__get_resized_mask_to_original_size(raw_mask)
+        return mask, grabcut_mask
 
     def __create_and_run_mrcnn_process(self, mrcnn_executor):
         mrcnn_process = multiprocessing.Process(target=mrcnn_executor.generate_and_save_mask)
@@ -150,14 +116,16 @@ class MRCNNShapeDetector:
             cv2.destroyAllWindows()
             return False
         else:
-            self.__execute_mask_rcnn()
-            self.active_mask = self.mask
+            mrcnn, grabcut = self.__execute_mask_rcnn()
+            mask_chooser = MaskChooser(self.img, mrcnn, grabcut)
+            self.active_mask = mask_chooser.choose_mask()
+            mask_drawer = MaskDrawer(self.img, self.active_mask)
+            self.active_mask = mask_drawer.get_final_mask()
             while True:
                 self.img_contour = self.img.copy()
                 self.__write_commands()
                 self.get_contours(save_shapes=False)
                 cv2.imshow(constants.SHAPE_DETECTION_WINDOW_NAME, self.img_contour)
-                cv2.setMouseCallback(constants.SHAPE_DETECTION_WINDOW_NAME, self.draw_mask_grabcut)
 
                 key = self.get_pressed_key()
                 if key == self.SCAN_CHAR:
@@ -167,8 +135,6 @@ class MRCNNShapeDetector:
                 elif key == self.QUIT_CHAR:
                     cv2.destroyAllWindows()
                     return False
-                elif key == self.CHANGE_MASK_CHAR:
-                    self.__change_active_mask()
                 elif cv2.getWindowProperty(constants.SHAPE_DETECTION_WINDOW_NAME, cv2.WND_PROP_VISIBLE) < 1:
                     return False
 
@@ -187,18 +153,6 @@ class MRCNNShapeDetector:
             self.img_contour,
             f"Premi '{self.QUIT_CHAR}' per uscire",
             (20, 45),
-            cv2.FONT_HERSHEY_DUPLEX,
-            .7,
-            (255, 0, 0),
-            2
-        )
-
-        cv2.putText(
-            self.img_contour,
-            f"Premi '{self.CHANGE_MASK_CHAR}' per " +
-            ('attivare' if self.active_mask is self.mask else 'disattivare') +
-            " ottimizzazione grabcut",
-            (20, 70),
             cv2.FONT_HERSHEY_DUPLEX,
             .7,
             (255, 0, 0),
@@ -317,10 +271,6 @@ class MRCNNShapeDetector:
     def calculate_cm_from_ratio(pixels, pixel_cm_ratio):
         return pixels / pixel_cm_ratio
 
-    def __change_active_mask(self):
-        self.shapes.clear()
-        self.active_mask = self.grabcut_mask if self.active_mask is self.mask else self.mask
-
     def get_pressed_key(self):
         keys = cv2.waitKey(1) & 0xFF
 
@@ -328,5 +278,3 @@ class MRCNNShapeDetector:
             return self.SCAN_CHAR
         elif keys == ord(self.QUIT_CHAR) or keys == ord(self.QUIT_CHAR.upper()):
             return self.QUIT_CHAR
-        elif keys == ord(self.CHANGE_MASK_CHAR) or keys == ord(self.CHANGE_MASK_CHAR.upper()):
-            return self.CHANGE_MASK_CHAR
