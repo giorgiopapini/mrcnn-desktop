@@ -1,14 +1,13 @@
 import json
-from math import sqrt
-
-import cv2
-from tkinter import *
 
 import numpy as np
+import cv2
+from tkinter import *
 
 import constants
 from App.Camera.PictureTaker import PictureTaker
 from App.Camera.camera_object import Camera
+from App.ShapeDetection.MaskDrawer.mask_drawer import MaskDrawer
 from App.ShapeDetection.shape import Shape
 from App.UI.Common.SettingsDecoder import SettingsDecoder
 
@@ -19,22 +18,15 @@ class ManualShapeDetector:
         self.cap = self.input_type.initialize_capture(img_path, SettingsDecoder['ADDRESS'])
 
         self.SCAN_CHAR = SettingsDecoder['SCAN_CHAR']
-        self.ERASE_CHAR = SettingsDecoder['ERASE_CHAR']
-        self.SHOW_SEGMENT_LENGTH_CHAR = SettingsDecoder['SHOW_CHAR']
-        self.show_segment_lengths = False
         self.QUIT_CHAR = SettingsDecoder['QUIT_CHAR']
+        self.CHANGE_MASK_CHAR = SettingsDecoder['CHANGE_MASK_CHAR']
 
         self.img = None
         self.img_contour = None
-        self.contours = [[]]
-        self.current_contour = 0
-        self.current_point = None
+        self.mask = None
 
         self.pixel_cm_squared_ratio = 0
         self.pixel_cm_ratio = 0
-
-        self.total_area_pixel = 0
-        self.total_perimeter_pixel = 0
 
         self.shapes = []
 
@@ -81,28 +73,20 @@ class ManualShapeDetector:
             cv2.destroyAllWindows()
             return False
         else:
+            self.mask = cv2.cvtColor(np.zeros(self.img.shape, dtype=np.uint8) * 255, cv2.COLOR_BGR2GRAY)
+            mask_drawer = MaskDrawer(self.img, self.mask)
+            self.active_mask = mask_drawer.get_final_mask()
             while True:
                 self.img_contour = self.img.copy()
                 self.__write_commands()
-                self.__draw_lines(is_closed=False)
-                self.__draw_point(self.current_point)
-                self.__draw_points()
-                self.__try_draw_segments_lengths()
+                self.get_contours(save_shapes=False)
                 cv2.imshow(constants.SHAPE_DETECTION_WINDOW_NAME, self.img_contour)
-                cv2.setMouseCallback(constants.SHAPE_DETECTION_WINDOW_NAME, self.mouse_events)
 
                 key = self.get_pressed_key()
-                if key == self.ERASE_CHAR:
-                    self.__try_delete_last_line()
-                elif key == self.SCAN_CHAR:
+                if key == self.SCAN_CHAR:
+                    self.get_contours(save_shapes=True)
                     cv2.destroyAllWindows()
-                    self.__create_shapes()
                     return True
-                elif key == self.SHOW_SEGMENT_LENGTH_CHAR:
-                    if self.show_segment_lengths is True:
-                        self.show_segment_lengths = False
-                    else:
-                        self.show_segment_lengths = True
                 elif key == self.QUIT_CHAR:
                     cv2.destroyAllWindows()
                     return False
@@ -122,7 +106,7 @@ class ManualShapeDetector:
 
         cv2.putText(
             self.img_contour,
-            f"Premi '{self.ERASE_CHAR}' per cancellare",
+            f"Premi '{self.QUIT_CHAR}' per uscire",
             (20, 45),
             cv2.FONT_HERSHEY_DUPLEX,
             .7,
@@ -130,151 +114,122 @@ class ManualShapeDetector:
             2
         )
 
-        cv2.putText(
-            self.img_contour,
-            f"Premi '{self.SHOW_SEGMENT_LENGTH_CHAR}' per " +
-            ('nascondere' if self.show_segment_lengths else 'mostrare') +
-            " la lunghezza dei segmenti",
-            (20, 70),
-            cv2.FONT_HERSHEY_DUPLEX,
-            .7,
-            (255, 0, 0),
-            2
-        )
+    def get_contours(self, save_shapes=False):
+        contours, hierachy = cv2.findContours(self.mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)  # RETR_CCOMP
+        for cnt in contours:
+            area = cv2.contourArea(cnt)
+            peri = cv2.arcLength(cnt, True)
+            m = cv2.moments(cnt)
+            if m['m00'] != 0:
+                cx = int(m['m10'] / m['m00'])
+                cy = int(m['m01'] / m['m00'])
+                if save_shapes:
+                    self.__update_shapes(cnt, area, peri, cx, cy)
+                cv2.drawContours(self.img_contour, cnt, -1, (255, 0, 255), 2)
+                approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
+                x, y, w, h = cv2.boundingRect(approx)
+                padding = SettingsDecoder['PADDING_PIXELS']
+                cv2.rectangle(
+                    self.img_contour,
+                    (x - padding, y - padding),
+                    (x + w + padding, y + h + padding),
+                    (0, 255, 0),
+                    3
+                )
 
-        cv2.putText(
-            self.img_contour,
-            f"Premi '{self.QUIT_CHAR}' per uscire",
-            (20, 95),
-            cv2.FONT_HERSHEY_DUPLEX,
-            .7,
-            (255, 0, 0),
-            2
-        )
+                cv2.putText(
+                    self.img_contour,
+                    f"x({cx}), y({cy})",
+                    (cx - 20, cy - 20),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5,
+                    (0, 120, 255),
+                    2
+                )
 
-        cv2.putText(
-            self.img_contour,
-            f"Usa il tasto sinistro del mouse per tracciare le linee",
-            (20, 120),
-            cv2.FONT_HERSHEY_DUPLEX,
-            .7,
-            (255, 0, 0),
-            2
-        )
+                cv2.putText(
+                    self.img_contour,
+                    "Area: " + str(int(area)),
+                    (x + w + 20, y + 45),
+                    cv2.FONT_HERSHEY_COMPLEX,
+                    .7,
+                    (0, 255, 0),
+                    2
+                )
 
-        cv2.putText(
-            self.img_contour,
-            f"Usa il tasto destro del mouse per terminare la stesura di un contorno",
-            (20, 145),
-            cv2.FONT_HERSHEY_DUPLEX,
-            .7,
-            (255, 0, 0),
-            2
-        )
+                cv2.putText(
+                    self.img_contour,
+                    "Peri: " + str(int(peri)),
+                    (x + w + 20, y + 70),
+                    cv2.FONT_HERSHEY_COMPLEX,
+                    .7,
+                    (0, 255, 0),
+                    2
+                )
 
-    def __draw_lines(self, is_closed):
-        for contour in self.contours:
-            pts = np.array(contour, np.int32)
-            pts = pts.reshape((-1, 1, 2))
-            color = (0, 255, 0)
-            thickness = 3
-            self.img_contour = cv2.polylines(self.img_contour, [pts], is_closed, color, thickness)
+                area_cm, perim_cm = self.__try_get_area_and_perim_in_cm(area, peri)
 
-    def __draw_points(self):
-        for contour in self.contours:
-            for point in contour:
-                self.__draw_point(point)
+                cv2.putText(
+                    self.img_contour,
+                    f"Area cm: {area_cm}",
+                    (x + w + 20, y + 95),
+                    cv2.FONT_HERSHEY_COMPLEX,
+                    .7,
+                    (0, 255, 0),
+                    2
+                )
 
-    def __draw_point(self, point):
-        if point is not None:
-            x = point[0]
-            y = point[1]
-            cv2.circle(self.img_contour, (x, y), radius=0, color=(0, 25, 255), thickness=8)
+                cv2.putText(
+                    self.img_contour,
+                    f"Perim cm: {perim_cm}",
+                    (x + w + 20, y + 120),
+                    cv2.FONT_HERSHEY_COMPLEX,
+                    .7,
+                    (0, 255, 0),
+                    2
+                )
 
-    def __try_draw_segments_lengths(self):
-        if self.show_segment_lengths is True:
-            for cnt in self.contours:
-                self.__try_draw_segments_in_contour(cnt)
+    def __update_shapes(self, contour, area, perim, cx, cy):
+        shape = self.__get_shape_if_exist(cx, cy)
+        if shape is None:
+            shape = Shape(cx, cy, contour)
+            self.shapes.append(shape)
+        shape.try_add_area(area, cx, cy)
+        shape.try_add_perim(perim, cx, cy)
 
-    def __try_draw_segments_in_contour(self, contour):
-        if len(contour) > 0:
-            for i in range(len(contour)):
-                if (i + 1) >= len(contour):
-                    break
-                else:
-                    first_point = contour[i]
-                    second_point = contour[i + 1]
-                    midpoint = (int((first_point[0] + second_point[0]) / 2), int((first_point[1] + second_point[1]) / 2))
-                    distance = sqrt(pow((second_point[0] - first_point[0]), 2) + pow((second_point[1] - first_point[1]), 2))
-                    if distance > 0:
-                        cv2.putText(
-                            self.img_contour,
-                            f"{distance}",
-                            midpoint,
-                            cv2.FONT_HERSHEY_DUPLEX,
-                            .7,
-                            (255, 0, 255),
-                            2
-                        )
+    def __get_shape_if_exist(self, cx, cy):
+        for shape in self.shapes:
+            if shape.shape_respects_boundaries(cx, cy):
+                return shape
+        return None
 
-    def __try_delete_last_line(self):
+    def __try_get_area_and_perim_in_cm(self, area_pixel, perimeter_pixel):
+        area = None
+        perim = None
         try:
-            self.contours[self.current_contour] = self.contours[self.current_contour][:-2]
-            self.current_point = self.contours[self.current_contour][len(self.contours[self.current_contour]) - 1]
-        except IndexError:
-            self.current_point = None
+            area, perim = self.__get_area_and_perim_cm(area_pixel, perimeter_pixel)
+        except ZeroDivisionError:
+            area = 'undefined'
+            perim = 'undefined'
+        return area, perim
 
-    def __create_shapes(self):
-        for contour in self.contours:
-            if len(contour) > 0:
-                contour = np.array(contour)
-                area = cv2.contourArea(contour)
-                peri = cv2.arcLength(contour, True)
-                m = cv2.moments(contour)
-                if m['m00'] != 0:
-                    cx = int(m['m10'] / m['m00'])
-                    cy = int(m['m01'] / m['m00'])
-                    shape = Shape(cx, cy, contour)
-                    shape.average_area = area
-                    shape.average_perim = peri
-                    self.shapes.append(shape)
+    def __get_area_and_perim_cm(self, area, perimeter):
+        if self.pixel_cm_ratio != 'undefined' and self.pixel_cm_squared_ratio != 'undefined':
+            raw_area = self.calculate_cm_from_ratio(area, self.pixel_cm_squared_ratio)
+            raw_perimeter = self.calculate_cm_from_ratio(perimeter, self.pixel_cm_ratio)
+            area_in_cm = format(raw_area, '.3f')
+            perimeter = format(raw_perimeter, '.3f')
+            return area_in_cm, perimeter
+        return 'undefined', 'undefined'
 
-    def mouse_events(self, event, x, y, flags, params):
-        if event == cv2.EVENT_LBUTTONDOWN:
-            self.__save_point((x, y))
-        elif event == cv2.EVENT_RBUTTONDOWN:
-            cnt = self.contours[self.current_contour]
-            if len(cnt) > 2:
-                start_x = cnt[0][0]
-                start_y = cnt[0][1]
-                self.__save_point((start_x, start_y))
-                self.__save_contour_and_create_new()
-
-        elif event == cv2.EVENT_MOUSEMOVE:
-            pass
-
-    def __save_point(self, point):
-        if self.current_point is None:
-            self.current_point = point
-        else:
-            self.contours[self.current_contour].append(self.current_point)
-            self.contours[self.current_contour].append(point)
-            self.current_point = point
-
-    def __save_contour_and_create_new(self):
-        if len(self.contours[self.current_contour]) > 2:
-            self.contours.append([])
-            self.current_point = None
-            self.current_contour += 1
+    @staticmethod
+    def calculate_cm_from_ratio(pixels, pixel_cm_ratio):
+        return pixels / pixel_cm_ratio
 
     def get_pressed_key(self):
         keys = cv2.waitKey(1) & 0xFF
 
-        if keys == ord(self.ERASE_CHAR) or keys == ord(self.ERASE_CHAR.upper()):
-            return self.ERASE_CHAR
-        elif keys == ord(self.SCAN_CHAR) or keys == ord(self.SCAN_CHAR.upper()):
+        if keys == ord(self.SCAN_CHAR) or keys == ord(self.SCAN_CHAR.upper()):
             return self.SCAN_CHAR
-        elif keys == ord(self.SHOW_SEGMENT_LENGTH_CHAR) or keys == ord(self.SHOW_SEGMENT_LENGTH_CHAR.upper()):
-            return self.SHOW_SEGMENT_LENGTH_CHAR
         elif keys == ord(self.QUIT_CHAR) or keys == ord(self.QUIT_CHAR.upper()):
             return self.QUIT_CHAR
