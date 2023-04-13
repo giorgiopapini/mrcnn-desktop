@@ -1,18 +1,20 @@
 import cv2
 import constants
+from App.UI.Common.SettingsDecoder import SettingsDecoder
 
 
 class MaskDrawer:
-    ZOOM_IN = '+'
-    ZOOM_OUT = '-'
-    UP = 'w'
-    DOWN = 's'
-    RIGHT = 'd'
-    LEFT = 'a'
-    QUIT = 'q'
-    SHOW = 'm'
 
     def __init__(self, img, mask, inital_zoom_level=1, initial_zoom_factor=1.1):
+        self.ZOOM_IN_CHAR = SettingsDecoder['ZOOM_IN_CHAR']
+        self.ZOOM_OUT_CHAR = SettingsDecoder['ZOOM_OUT_CHAR']
+        self.UP_CHAR = SettingsDecoder['UP_CHAR']
+        self.DOWN_CHAR = SettingsDecoder['DOWN_CHAR']
+        self.LEFT_CAR = SettingsDecoder['LEFT_CHAR']
+        self.RIGHT_CHAR = SettingsDecoder['RIGHT_CHAR']
+        self.QUIT_CHAR = SettingsDecoder['QUIT_CHAR']
+        self.SHOW_MASK_CHAR = SettingsDecoder['SHOW_MASK_CHAR']
+
         self.original = img
         self.img = self.original.copy()
         self.mask = mask
@@ -66,20 +68,20 @@ class MaskDrawer:
             pass
 
     def __navigate_image(self, key):
-        if key == ord(MaskDrawer.ZOOM_IN):
+        if key == ord(self.ZOOM_IN_CHAR):
             self.zoom_level *= self.zoom_factor
-        elif key == ord(MaskDrawer.ZOOM_OUT):
+        elif key == ord(self.ZOOM_OUT_CHAR):
             self.zoom_level /= self.zoom_factor
-        elif key == ord(MaskDrawer.RIGHT):
+        elif key == ord(self.RIGHT_CHAR):
             if not self.blocked_right:
                 self.move_x += 10
-        elif key == ord(MaskDrawer.LEFT):
+        elif key == ord(self.LEFT_CAR):
             if not self.blocked_left:
                 self.move_x -= 10
-        elif key == ord(MaskDrawer.UP):
+        elif key == ord(self.UP_CHAR):
             if not self.blocked_up:
                 self.move_y -= 10
-        elif key == ord(MaskDrawer.DOWN):
+        elif key == ord(self.DOWN_CHAR):
             if not self.blocked_down:
                 self.move_y += 10
 
@@ -155,8 +157,8 @@ class MaskDrawer:
 
             key = cv2.waitKey(1) & 0xFF
             self.__navigate_image(key)
-            if key == ord(MaskDrawer.SHOW):
+            if key == ord(self.SHOW_MASK_CHAR):
                 self.show_mask = True if self.show_mask is False else False
-            elif key == ord(MaskDrawer.QUIT) or key == 27:
+            elif key == ord(self.QUIT_CHAR) or key == 27:
                 cv2.destroyAllWindows()
                 return self.mask

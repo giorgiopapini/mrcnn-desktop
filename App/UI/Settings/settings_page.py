@@ -10,6 +10,7 @@ class SettingsPage(Page):
     BACKGROUND_IMG_PATH = "App/UI/Settings/background.png"
     INFO_BTN_IMG_PATH = "App/UI/Settings/info.png"
     EXTRA_SHORT_FIELD_PATH = "App/UI/Settings/extra_short.png"
+    SUPER_EXTRA_SHORT_FIELD_PATH = "App/UI/Settings/super_extra_short.png"
     SHORT_FIELD_PATH = "App/UI/Settings/short.png"
     MEDIUM_FIELD_PATH = "App/UI/Settings/medium.png"
     LONG_FIELD_PATH = "App/UI/Settings/long.png"
@@ -21,6 +22,7 @@ class SettingsPage(Page):
         self.background_img = PhotoImage(file=self.BACKGROUND_IMG_PATH)
         self.info_btn_img = PhotoImage(file=self.INFO_BTN_IMG_PATH)
         self.extra_short_field_img = PhotoImage(file=self.EXTRA_SHORT_FIELD_PATH)
+        self.super_extra_short_field_img = PhotoImage(file=self.SUPER_EXTRA_SHORT_FIELD_PATH)
         self.short_field_img = PhotoImage(file=self.SHORT_FIELD_PATH)
         self.medium_field_img = PhotoImage(file=self.MEDIUM_FIELD_PATH)
         self.long_field_img = PhotoImage(file=self.LONG_FIELD_PATH)
@@ -197,75 +199,159 @@ class SettingsPage(Page):
             height=19
         )
 
-        self.scan_duration_field = self.canvas.create_image(
-            596.5, 366.5,
-            image=self.short_field_img
+        self.up_field = self.canvas.create_image(
+            121.5, 366.5,
+            image=self.super_extra_short_field_img
         )
 
-        self.scan_duration_field = FormField(
-            root=self.root,
-            input_type=constants.DataTypes.INT,
-            setting='SCAN_TIME',
-            bd=0,
-            bg="#ffffff",
-            highlightthickness=0,
-            justify="center"
-        )
-
-        self.scan_duration_field.place(
-            x=571, y=358.4,
-            width=51,
-            height=19
-        )
-
-        self.show_segment_length_char_field = self.canvas.create_image(
-            308.5, 366.5,
-            image=self.short_field_img
-        )
-
-        self.show_segment_length_char_field = FormField(
+        self.up_field = FormField(
             root=self.root,
             input_type=constants.DataTypes.CHAR,
-            setting='SHOW_CHAR',
+            setting='UP_CHAR',
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
             justify="center"
         )
 
-        self.show_segment_length_char_field.place(
-            x=283, y=358.4,
-            width=51,
+        self.up_field.place(
+            x=113, y=358.4,
+            width=17,
             height=19
         )
 
-        self.erase_segment_char_field = self.canvas.create_image(
-            308.5, 391.5,
-            image=self.short_field_img
+        self.down_field = self.canvas.create_image(
+            181.5, 366.5,
+            image=self.super_extra_short_field_img
         )
 
-        self.erase_segment_char_field = FormField(
+        self.down_field = FormField(
             root=self.root,
             input_type=constants.DataTypes.CHAR,
-            setting='ERASE_CHAR',
+            setting='DOWN_CHAR',
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
             justify="center"
         )
 
-        self.erase_segment_char_field.place(
-            x=283, y=383.4,
-            width=51,
+        self.down_field.place(
+            x=173, y=358.4,
+            width=17,
             height=19
         )
 
-        self.manage_grabcut_char_field = self.canvas.create_image(
-            338.5, 418.5,
-            image=self.short_field_img
+        self.right_field = self.canvas.create_image(
+            260.5, 366.5,
+            image=self.super_extra_short_field_img
         )
 
-        self.manage_grabcut_char_field = FormField(
+        self.right_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.CHAR,
+            setting='RIGHT_CHAR',
+            bd=0,
+            bg="#ffffff",
+            highlightthickness=0,
+            justify="center"
+        )
+
+        self.right_field.place(
+            x=252, y=358.4,
+            width=17,
+            height=19
+        )
+
+        self.left_field = self.canvas.create_image(
+            349.5, 366.5,
+            image=self.super_extra_short_field_img
+        )
+
+        self.left_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.CHAR,
+            setting='LEFT_CHAR',
+            bd=0,
+            bg="#ffffff",
+            highlightthickness=0,
+            justify="center"
+        )
+
+        self.left_field.place(
+            x=341, y=358.4,
+            width=17,
+            height=19
+        )
+
+        self.zoom_in_field = self.canvas.create_image(
+            161.5, 391.5,
+            image=self.super_extra_short_field_img
+        )
+
+        self.zoom_in_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.CHAR,
+            setting='ZOOM_IN_CHAR',
+            bd=0,
+            bg="#ffffff",
+            highlightthickness=0,
+            justify="center"
+        )
+
+        self.zoom_in_field.place(
+            x=154, y=383.4,
+            width=17,
+            height=19
+        )
+
+        self.zoom_out_field = self.canvas.create_image(
+            274.5, 391.5,
+            image=self.super_extra_short_field_img
+        )
+
+        self.zoom_out_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.CHAR,
+            setting='ZOOM_OUT_CHAR',
+            bd=0,
+            bg="#ffffff",
+            highlightthickness=0,
+            justify="center"
+        )
+
+        self.zoom_out_field.place(
+            x=266, y=383.4,
+            width=17,
+            height=19
+        )
+
+        self.mask_select_field = self.canvas.create_image(
+            206.5, 418.5,
+            image=self.super_extra_short_field_img
+        )
+
+        self.mask_select_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.CHAR,
+            setting='SELECT_MASK_CHAR',
+            bd=0,
+            bg="#ffffff",
+            highlightthickness=0,
+            justify="center"
+        )
+
+        self.mask_select_field.place(
+            x=198, y=410.4,
+            width=17,
+            height=19
+        )
+
+        self.mask_change_field = self.canvas.create_image(
+            346.5, 418.5,
+            image=self.super_extra_short_field_img
+        )
+
+        self.mask_change_field = FormField(
             root=self.root,
             input_type=constants.DataTypes.CHAR,
             setting='CHANGE_MASK_CHAR',
@@ -275,14 +361,35 @@ class SettingsPage(Page):
             justify="center"
         )
 
-        self.manage_grabcut_char_field.place(
-            x=313, y=410.4,
+        self.mask_change_field.place(
+            x=338, y=410.4,
+            width=17,
+            height=19
+        )
+
+        self.center_boundary_field = self.canvas.create_image(
+            610.5, 366.5,
+            image=self.short_field_img
+        )
+
+        self.center_boundary_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.INT,
+            setting='CENTER_BOUNDARY_PIXELS',
+            bd=0,
+            bg="#ffffff",
+            highlightthickness=0,
+            justify="center"
+        )
+
+        self.center_boundary_field.place(
+            x=585, y=358.4,
             width=51,
             height=19
         )
 
         self.padding_field = self.canvas.create_image(
-            526.5, 418.5,
+            526.5, 391.5,
             image=self.extra_short_field_img
         )
 
@@ -297,28 +404,50 @@ class SettingsPage(Page):
         )
 
         self.padding_field.place(
-            x=512, y=410.4,
+            x=512, y=383.4,
             width=29,
             height=19
         )
 
-        self.center_boundary_field = self.canvas.create_image(
-            610.5, 391.5,
-            image=self.short_field_img)
+        self.mask_save_field = self.canvas.create_image(
+            540.5, 418.5,
+            image=self.super_extra_short_field_img
+        )
 
-        self.center_boundary_field = FormField(
+        self.mask_save_field = FormField(
             root=self.root,
-            input_type=constants.DataTypes.INT,
-            setting='CENTER_BOUNDARY_PIXELS',
+            input_type=constants.DataTypes.CHAR,
+            setting='SAVE_MASK_CHAR',
             bd=0,
             bg="#ffffff",
             highlightthickness=0,
             justify="center"
         )
 
-        self.center_boundary_field.place(
-            x=585, y=383.4,
-            width=51,
+        self.mask_save_field.place(
+            x=532, y=410.4,
+            width=17,
+            height=19
+        )
+
+        self.mask_show_field = self.canvas.create_image(
+            688.5, 418.5,
+            image=self.extra_short_field_img
+        )
+
+        self.mask_show_field = FormField(
+            root=self.root,
+            input_type=constants.DataTypes.CHAR,
+            setting='SHOW_MASK_CHAR',
+            bd=0,
+            bg="#ffffff",
+            highlightthickness=0,
+            justify="center"
+        )
+
+        self.mask_show_field.place(
+            x=680, y=410.4,
+            width=17,
             height=19
         )
 
@@ -410,12 +539,18 @@ class SettingsPage(Page):
         self.start_scan_char_field.update_setting()
         self.stop_camera_char_field.update_setting()
         self.camera_address_info.update_setting()
-        self.scan_duration_field.update_setting()
-        self.show_segment_length_char_field.update_setting()
-        self.erase_segment_char_field.update_setting()
-        self.manage_grabcut_char_field.update_setting()
+        self.up_field.update_setting()
+        self.down_field.update_setting()
+        self.right_field.update_setting()
+        self.left_field.update_setting()
+        self.zoom_in_field.update_setting()
+        self.zoom_out_field.update_setting()
+        self.mask_select_field.update_setting()
+        self.mask_change_field.update_setting()
         self.padding_field.update_setting()
         self.center_boundary_field.update_setting()
+        self.mask_save_field.update_setting()
+        self.mask_show_field.update_setting()
         self.chessboard_cols_field.update_setting()
         self.chessboard_rows_field.update_setting()
         self.calibration_images_needed_field.update_setting()

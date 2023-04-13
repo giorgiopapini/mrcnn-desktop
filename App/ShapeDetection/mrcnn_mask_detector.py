@@ -8,14 +8,12 @@ from App.ShapeDetection.MaskChooser.mask_chooser import MaskChooser
 from App.ShapeDetection.MaskDrawer.mask_drawer import MaskDrawer
 from App.ShapeDetection.MaskRefiner.mask_refiner import MaskRefiner
 from App.ShapeDetection.manual_shape_detector import ManualShapeDetector
-from App.UI.Common.SettingsDecoder import SettingsDecoder
 from App.ShapeDetection.mrcnn.mrcnn_executor import MRCNNExecutor
 
 
 class MRCNNShapeDetector(ManualShapeDetector):
     def __init__(self, input_type=constants.DetectionInputType.VIDEO, img_path=""):
         super().__init__(input_type, img_path)
-        self.CHANGE_MASK_CHAR = SettingsDecoder['CHANGE_MASK_CHAR']
 
     def __execute_mask_rcnn(self):
         resized_img = self.__get_resized_img_to_mrcnn_required_size()
