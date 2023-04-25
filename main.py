@@ -1,3 +1,4 @@
+import multiprocessing
 from tkinter import *
 
 from App.UI.Common.SettingsDecoder import SettingsDecoder
@@ -15,4 +16,5 @@ def main():
 
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     main()
