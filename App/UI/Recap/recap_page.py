@@ -107,6 +107,7 @@ class RecapPage(Page):
 
     def save_cropped_images(self):
         chosen_dir = askdirectory()
-        for i in range(len(self.final_shapes)):
-            cv2.imwrite(f"{chosen_dir}/scan-{i + 1}.png", self.final_shapes[i][0].final_img)
-        self.to_page(page=self.homepage)
+        if chosen_dir:
+            for i in range(len(self.final_shapes)):
+                cv2.imwrite(f"{chosen_dir}/scan-{i + 1}.png", self.final_shapes[i][0].final_img)
+            self.to_page(page=self.homepage)
