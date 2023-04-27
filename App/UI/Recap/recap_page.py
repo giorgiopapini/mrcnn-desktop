@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter.filedialog import askdirectory
 
 import cv2
 
@@ -105,6 +106,7 @@ class RecapPage(Page):
             pass
 
     def save_cropped_images(self):
+        chosen_dir = askdirectory()
         for i in range(len(self.final_shapes)):
-            cv2.imwrite(f"Results/scan{i + 1}.png", self.final_shapes[i][0].final_img)
+            cv2.imwrite(f"{chosen_dir}/scan-{i + 1}.png", self.final_shapes[i][0].final_img)
         self.to_page(page=self.homepage)
