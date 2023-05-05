@@ -39,6 +39,13 @@ class MaskDrawer:
         self.writing_bg = True
 
         self.show_mask = True
+        self.__create_trackbars()
+
+    def __create_trackbars(self):
+        cv2.namedWindow(constants.PARAMETERS_WINDOW_NAME)
+        cv2.resizeWindow(constants.PARAMETERS_WINDOW_NAME, 700, 315)
+        cv2.createTrackbar("Pencil", constants.PARAMETERS_WINDOW_NAME, 1, 100, constants.empty)
+        cv2.createTrackbar("Eraser", constants.PARAMETERS_WINDOW_NAME, 1, 100, constants.empty)
 
     def __manage_image_constraints(self, x, y, frame_width, frame_height, resized_image):
         if x + frame_width > resized_image.shape[1]:
@@ -108,9 +115,11 @@ class MaskDrawer:
             if self.drawing:
                 if self.mode:
                     if self.writing_bg:
-                        cv2.line(self.mask, (self.current_former_x, self.current_former_y), (former_x, former_y), (0, 0, 0), 3)
+                        eraser_thickness = cv2.getTrackbarPos("Eraser", constants.PARAMETERS_WINDOW_NAME)
+                        cv2.line(self.mask, (self.current_former_x, self.current_former_y), (former_x, former_y), (0, 0, 0), eraser_thickness)
                     else:
-                        cv2.line(self.mask, (self.current_former_x, self.current_former_y), (former_x, former_y), (255, 255, 255),3)
+                        pencil_thickness = cv2.getTrackbarPos("Pencil", constants.PARAMETERS_WINDOW_NAME)
+                        cv2.line(self.mask, (self.current_former_x, self.current_former_y), (former_x, former_y), (255, 255, 255), pencil_thickness)
                     self.current_former_x = former_x
                     self.current_former_y = former_y
 
